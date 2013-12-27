@@ -3667,6 +3667,9 @@ public final class Settings {
         public static final String DIM_NAV_BUTTONS_TOUCH_ANYWHERE = "dim_nav_buttons_touch_anywhere";
 
         /* Network speed indicator
+         * 0 = disabled
+	     * 1 = show bits per second
+	     * 2 = show Bytes per second
          * @hide
          */
         public static final String STATUS_BAR_TRAFFIC = "status_bar_traffic";
