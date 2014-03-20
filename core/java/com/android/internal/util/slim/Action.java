@@ -417,6 +417,13 @@ public class Action {
             WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
         } catch (RemoteException e) {
             Log.w("Action", "Error dismissing keyguard", e);
+
+            if (Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.SLIM_ACTION_FLOATS, 0) == 1) {
+            intent.setFlags(Intent.FLAG_FLOATING_WINDOW);
+            }
+            context.startActivityAsUser(intent,
+                    new UserHandle(UserHandle.USER_CURRENT));
         }
         intent.addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK
@@ -434,8 +441,8 @@ public class Action {
             event = KeyEvent.changeAction(event, KeyEvent.ACTION_UP);
             MediaSessionLegacyHelper.getHelper(context).sendMediaButtonEvent(event, true);
         }
-    }
-
+	}
+	
     public static void triggerVirtualKeypress(final int keyCode, boolean longpress) {
         InputManager im = InputManager.getInstance();
         long now = SystemClock.uptimeMillis();
