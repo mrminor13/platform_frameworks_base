@@ -4029,6 +4029,24 @@ public final class Settings {
         public static final String RECENT_CARD_BG_COLOR = "recent_card_bg_color";
 
         /**
+         * Whether the phone ringtone should be played in an increasing manner
+         * @hide
+         */
+        public static final String INCREASING_RING = "increasing_ring";
+
+        /**
+         * Start volume fraction for increasing ring volume
+         * @hide
+         */
+        public static final String INCREASING_RING_START_VOLUME = "increasing_ring_start_vol";
+
+        /**
+         * Ramp up time (seconds) for increasing ring
+         * @hide
+         */
+        public static final String INCREASING_RING_RAMP_UP_TIME = "increasing_ring_ramp_up_time";
+
+        /**
          * Recent card text color
          *
          * @hide
@@ -4118,7 +4136,10 @@ public final class Settings {
             PHONE_BLACKLIST_PRIVATE_NUMBER_MODE,
             PHONE_BLACKLIST_UNKNOWN_NUMBER_MODE,
             PHONE_BLACKLIST_REGEX_ENABLED,
-            NOTIFICATION_LIGHT_SCREEN_ON
+            NOTIFICATION_LIGHT_SCREEN_ON,
+            INCREASING_RING,
+            INCREASING_RING_START_VOLUME,
+            INCREASING_RING_RAMP_UP_TIME
         };
 
         /**
@@ -8759,6 +8780,7 @@ public final class Settings {
          * @return A title that is localized and can be displayed to the user,
          *         or the empty string if one could not be found.
          */
+         
         public static CharSequence getTitle(Context context, Cursor cursor) {
             int titleColumn = cursor.getColumnIndex(TITLE);
             int intentColumn = cursor.getColumnIndex(INTENT);
