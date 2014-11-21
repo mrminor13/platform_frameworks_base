@@ -2299,4 +2299,7 @@
     <string-array name="config_cell_retries_per_error_code">
     </string-array>
 
+    <!-- Sets whether IME switcher on statusbar should be shown or not. -->
+	<bool name="config_show_IMESwitcher">true</bool>
+
 </resources>
