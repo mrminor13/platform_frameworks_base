@@ -3189,8 +3189,14 @@ public final class Settings {
         public static final String IN_CALL_PROXIMITY_SENSOR = "in_call_proximity_sensor";
 
         /**
-         * Boolean value whether to link ringtone and notification volume
          *
+         * Volume music controls
+         * @hide
+         */
+        public static final String VOLUME_MUSIC_CONTROLS = "volume_music_controls";
+
+        /**
+         * Boolean value whether to link ringtone and notification volume
          * @hide
          */
         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
