@@ -24,7 +24,6 @@ import android.provider.Settings;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.AnimationUtils;
@@ -49,7 +48,6 @@ public class KeyguardStatusBarView extends RelativeLayout
     private boolean mKeyguardUserSwitcherShowing;
     private boolean mBatteryListening;
 
-    private TextView mCarrierLabel;
     private View mSystemIconsSuperContainer;
     private MultiUserSwitch mMultiUserSwitch;
     private ImageView mMultiUserAvatar;
@@ -109,15 +107,6 @@ public class KeyguardStatusBarView extends RelativeLayout
                 android.R.interpolator.fast_out_slow_in);
         updateUserSwitcher();
         updateVisibilities();
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        // Respect font size setting.
-        mBatteryLevel.setTextSize(TypedValue.COMPLEX_UNIT_PX,
-                getResources().getDimensionPixelSize(R.dimen.battery_level_text_size));
     }
 
     private void loadDimens() {
