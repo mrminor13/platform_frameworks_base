@@ -2016,6 +2016,12 @@ public final class Settings {
         @Deprecated
         public static final String NEXT_ALARM_FORMATTED = "next_alarm_formatted";
 
+
+        /**
+         * Option to hide the Alarm icon in the status bar.
+         */
+        public static final String SHOW_ALARM_ICON = "show_alarm_icon";
+
         /**
          * Scaling factor for fonts, float.
          */
