@@ -37,6 +37,21 @@ import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.HotspotController;
 
+import android.database.ContentObserver;
+import android.media.AudioManager;
+import android.net.Uri;
+import android.os.Handler;
+import android.os.storage.StorageEventListener;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
+import android.os.UserHandle;
+import android.provider.Settings;
+
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
+import android.util.Log;
+
+
 /**
  * This class contains all of the policy about which icons are installed in the status
  * bar at boot time.  It goes through the normal API for icons, even though it probably
@@ -63,6 +78,7 @@ public class PhoneStatusBarPolicy {
     private final Handler mHandler = new Handler();
     private final CastController mCast;
     private final HotspotController mHotspot;
+    private boolean mAlarmIconVisible;
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -163,7 +179,27 @@ public class PhoneStatusBarPolicy {
         mService.setIcon(SLOT_HOTSPOT, R.drawable.stat_sys_hotspot, 0, null);
         mService.setIconVisibility(SLOT_HOTSPOT, mHotspot.isHotspotEnabled());
         mHotspot.addCallback(mHotspotCallback);
+        
+         // alarmicon
+        mAlarmIconObserver.onChange(true);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.SHOW_ALARM_ICON),
+                false, mAlarmIconObserver);
     }
+
+    private ContentObserver mAlarmIconObserver = new ContentObserver(null) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            mAlarmIconVisible = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.SHOW_ALARM_ICON, 1) == 1;
+            updateAlarm();
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            onChange(selfChange, null);
+        }
+    };
 
     public void setZenMode(int zen) {
         mZen = zen;
@@ -172,8 +208,8 @@ public class PhoneStatusBarPolicy {
 
     private void updateAlarm() {
         AlarmManager alarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-	boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
-        mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmSet);
+        boolean alarmSet = alarmManager.getNextAlarmClock(UserHandle.USER_CURRENT) != null;
+        mService.setIconVisibility(SLOT_ALARM_CLOCK, alarmSet && mAlarmIconVisible);
     }
 
     private final void updateSyncState(Intent intent) {
