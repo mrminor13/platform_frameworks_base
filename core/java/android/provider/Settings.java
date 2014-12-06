@@ -5345,6 +5345,12 @@ public final class Settings {
          */
         public static final String PRIVACY_GUARD_DEFAULT = "privacy_guard_default";
 
+		/**
+         * Whether to use the custom quick unlock screen control
+         * @hide
+         */
+        public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
+
         /**
          * Whether privacy guard notification should show.
          * @hide
@@ -5551,6 +5557,8 @@ public final class Settings {
             ADVANCED_REBOOT,          
             PRIVACY_GUARD_DEFAULT,
             PRIVACY_GUARD_NOTIFICATION
+            STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD,
+            LOCKSCREEN_QUICK_UNLOCK_CONTROL
         };
 
         /**
