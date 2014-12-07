@@ -5549,8 +5549,7 @@ public final class Settings {
             SLEEP_TIMEOUT,
             ADVANCED_REBOOT,          
             PRIVACY_GUARD_DEFAULT,
-            PRIVACY_GUARD_NOTIFICATION
-            STATUS_BAR_LOCKED_ON_SECURE_KEYGUARD,
+            PRIVACY_GUARD_NOTIFICATION,
             LOCKSCREEN_QUICK_UNLOCK_CONTROL
         };
 
