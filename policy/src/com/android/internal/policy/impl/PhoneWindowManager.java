@@ -4800,7 +4800,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             // on key down events
                             mayChangeVolume = down;
                         }
-                        if (!isScreenOn() && !mVolumeWakeScreen) {
+                        if (!isScreenOn()) {
                             // If we aren't passing to the user and no one else
                             // handled it send it to the session manager to figure
                             // out.
