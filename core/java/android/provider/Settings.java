@@ -4208,6 +4208,12 @@ public final class Settings {
         public static final String STATUS_BAR_WEATHER_COLOR = "status_bar_weather_color";
 
         /**
+         * Settings for clock font style
+         * @hide
+         */
+        public static final String STATUSBAR_CLOCK_FONT_STYLE = "statusbar_clock_font_style";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
