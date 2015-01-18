@@ -30,4 +30,9 @@
     <string name="accessibility_quick_settings_heads_up_changed_off">Heads up turned off</string>
     <!-- Announcement made when heads up changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_heads_up_changed_on">Heads up turned on</string>
+
+    <!-- Lockscreen shortcuts -->
+    <string name="left_shortcut_hint">Swipe right for %1$s</string>
+    <string name="right_shortcut_hint">Swipe left for %1$s</string>
+
 </resources>
