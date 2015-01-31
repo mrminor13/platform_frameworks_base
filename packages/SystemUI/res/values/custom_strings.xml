@@ -119,4 +119,16 @@
     <string name="status_bar_expanded_header_weather_format"><xliff:g id="temp">%1$s</xliff:g> - <xliff:g id="condition">%2$s</xliff:g></string>
     <string name="weather_info_not_available">Weather informations not available</string>
 
+    <!-- Sync qs tile -->
+    <string name="quick_settings_sync_label">Sync</string>
+    <!-- Content description of the sync tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_sync_off">Sync off.</string>
+    <!-- Content description of the sync tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_sync_on">Sync on.</string>
+
+    <!-- Announcement made when sync changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_sync_changed_off">Sync turned off.</string>
+    <!-- Announcement made when sync changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_sync_changed_on">Sync turned on.</string>
+
 </resources>

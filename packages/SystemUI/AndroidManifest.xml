@@ -127,9 +127,6 @@
     <!-- Screen Capturing -->
     <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
 
-    <!-- Weather -->
-    <uses-permission android:name="com.cyanogenmod.lockclock.permission.READ_WEATHER" />
-
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
 
@@ -137,6 +134,13 @@
     <permission android:name="com.android.systemui.permission.SELF"
             android:protectionLevel="signature" />
     <uses-permission android:name="com.android.systemui.permission.SELF" />
+
+    <!-- Weather -->
+    <uses-permission android:name="com.cyanogenmod.lockclock.permission.READ_WEATHER" />
+
+    <!-- Sync tile -->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
 
     <application
         android:name=".SystemUIApplication"
