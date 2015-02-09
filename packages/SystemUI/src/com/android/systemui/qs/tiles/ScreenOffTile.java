@@ -46,6 +46,11 @@ public class ScreenOffTile extends QSTile<QSTile.BooleanState> {
     }
 
     @Override
+    public int getMetricsCategory() {
+        return MetricsLogger.SCREEN;
+    }
+
+    @Override
     protected BooleanState newTileState() {
         return new BooleanState();
     }
@@ -57,36 +62,26 @@ public class ScreenOffTile extends QSTile<QSTile.BooleanState> {
 
     @Override
     public void handleClick() {
-        MetricsLogger.action(mContext, getMetricsCategory());
         mHost.collapsePanels();
         mPm.goToSleep(SystemClock.uptimeMillis());
     }
 
     @Override
     protected void handleSecondaryClick() {
-        MetricsLogger.action(mContext, getMetricsCategory());
         mHost.collapsePanels();
         triggerVirtualKeypress(KeyEvent.KEYCODE_POWER, true);
     }
 
     @Override
     public void handleLongClick() {
-        MetricsLogger.action(mContext, getMetricsCategory());
         mHost.collapsePanels();
         triggerVirtualKeypress(KeyEvent.KEYCODE_POWER, true);
     }
 
     @Override
-    public int getMetricsCategory() {
-        return MetricsLogger.QS_SCREEN_OFF;
-    }
-
-    @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
         state.visible = true;
-        state.label = mContext.getString(R.string.quick_settings_screen_off_label);
-        state.contentDescription = mContext.getString(
-                R.string.accessibility_quick_settings_screen_off);
+        state.label = mContext.getString(R.string.quick_settings_screen_off);
         state.icon = ResourceIcon.get(R.drawable.ic_qs_power);
     }
 
