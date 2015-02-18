@@ -11,4 +11,6 @@ LOCAL_SRC_FILES += \
 
 LOCAL_JAVA_LIBRARIES := android.policy telephony-common
 
+LOCAL_JAVA_LIBRARIES += services.accessibility
+
 include $(BUILD_STATIC_JAVA_LIBRARY)
