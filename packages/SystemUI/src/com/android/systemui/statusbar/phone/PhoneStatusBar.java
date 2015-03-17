@@ -2206,7 +2206,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
 
         // apply user lockscreen image
-        if (backdropBitmap == null) {
+        if (mMediaMetadata == null && backdropBitmap == null) {
             WallpaperManager wm = (WallpaperManager)
                     mContext.getSystemService(Context.WALLPAPER_SERVICE);
             if (wm != null) {
@@ -3680,6 +3680,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         updateNotifications();
         resetUserSetupObserver();
         setControllerUsers();
+
+        WallpaperManager wm = (WallpaperManager)
+                mContext.getSystemService(Context.WALLPAPER_SERVICE);
+        wm.forgetLoadedKeyguardWallpaper();
+        updateMediaMetaData(true);
     }
 
     private void setControllerUsers() {
