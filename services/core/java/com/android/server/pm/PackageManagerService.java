@@ -13870,9 +13870,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PreferredActivity pa = it.next();
                 // Mark entry for removal only if it matches the package name
                 // and the entry is of type "always".
-                if (packageName == null ||
-                        (pa.mPref.mComponent.getPackageName().equals(packageName)
-                                && pa.mPref.mAlways)) {
+                if ((packageName == null ||
+                        pa.mPref.mComponent.getPackageName().equals(packageName))
+                                && pa.mPref.mAlways) {
                     if (removed == null) {
                         removed = new ArrayList<PreferredActivity>();
                     }
@@ -13963,9 +13963,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final Iterator<PreferredActivity> it = pir.filterIterator();
                 while (it.hasNext()) {
                     final PreferredActivity pa = it.next();
-                    if (packageName == null
-                            || (pa.mPref.mComponent.getPackageName().equals(packageName)
-                                    && pa.mPref.mAlways)) {
+                    if ((packageName == null
+                            || pa.mPref.mComponent.getPackageName().equals(packageName))
+                                    && pa.mPref.mAlways) {
                         if (outFilters != null) {
                             outFilters.add(new IntentFilter(pa));
                         }
