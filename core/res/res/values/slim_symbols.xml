@@ -117,4 +117,15 @@
   <java-symbol type="anim" name="recent_screen_enter_left" />
   <java-symbol type="anim" name="recent_screen_fade_out" />
 
+  <!-- Config Power Menu -->
+  <java-symbol type="drawable" name="ic_lock_power_off_alpha" />
+  <java-symbol type="drawable" name="ic_lock_reboot_alpha" />
+  <java-symbol type="drawable" name="ic_lock_screenshot" />
+  <java-symbol type="drawable" name="ic_lock_airplane_mode_off_am_alpha" />
+  <java-symbol type="drawable" name="ic_lock_lock_alpha" />
+  <java-symbol type="color" name="dslv_icon_dark" />
+
+  <java-symbol type="color" name="global_menu_icon" />
+  <java-symbol type="color" name="global_menu_icon_enabled" />
+
 </resources>
