@@ -5217,14 +5217,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
-        List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
         if (!sUserManager.exists(userId)) return null;
-        if (query != null) {
-            if (query.size() >= 1) {
-                // If there is more than one service with the same priority,
-                // just arbitrarily pick the first one.
-                return query.get(0);
-            }
+        List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
+        if (!query.isEmpty()) {
+          // If there is more than one service with the same priority,
+          // just arbitrarily pick the first one.
+          return query.get(0);
         }
         return null;
     }
@@ -5262,7 +5260,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return mServices.queryIntentForPackage(intent, resolvedType, flags, pkg.services,
                         userId);
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -5299,7 +5297,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return mProviders.queryIntentForPackage(
                         intent, resolvedType, flags, pkg.providers, userId);
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 
