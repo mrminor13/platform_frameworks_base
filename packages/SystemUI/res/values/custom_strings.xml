@@ -38,6 +38,16 @@
     <!-- Content description of the volume panel tile in quick settings (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_volume_panel">Volume panel.</string>
 
+    <!-- Content description of the heads up tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_heads_up_off">Heads up off.</string>
+    <!-- Content description of the heads up tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_heads_up_on">Heads up on.</string>
+
+    <!-- Announcement made when heads up changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads up turned off.</string>
+    <!-- Announcement made when heads up changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads up turned on.</string>
+
     <!-- Content description of the USB tethering tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_usb_tether_off">USB tethering off.</string>
     <!-- Content description of the USB tethering tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
@@ -47,11 +57,6 @@
     <string name="accessibility_quick_settings_usb_tether_changed_off">USB tethering turned off.</string>
     <!-- Announcement made when USB tethering changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_usb_tether_changed_on">USB tethering turned on.</string>
-
-    <!-- QuickSettings tiles -->
-    <string name="quick_settings_usb_tether_label">USB tethering</string>
-
-    <string name="quick_settings_nfc_label">NFC</string>
 
     <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_location_battery_saving">Location reporting: battery saving mode.</string>
@@ -84,6 +89,31 @@
     <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
     <string name="quick_settings_location_detail_mode_sensors_only_description">Use GPS to determine your location</string>
 
+    <!-- Content description of the USB tethering tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_usb_tether_off">USB tethering off.</string>
+    <!-- Content description of the USB tethering tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_usb_tether_on">USB tethering on.</string>
+
+    <!-- Announcement made when USB tethering changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_usb_tether_changed_off">USB tethering turned off.</string>
+    <!-- Announcement made when USB tethering changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_usb_tether_changed_on">USB tethering turned on.</string>
+
+    <!-- Content description of the ambient display tile in quick settings when off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_ambient_display_off">Ambient Display off.</string>
+    <!-- Content description of the ambient display tile in quick settings when on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_ambient_display_on">Ambient Display on.</string>
+
+    <!-- Announcement made when ambient display changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Ambient Display turned off.</string>
+    <!-- Announcement made when ambient display changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Ambient Display turned on.</string>
+
+    <!-- QuickSettings tiles -->
+    <string name="quick_settings_usb_tether_label">USB tethering</string>
+    <string name="quick_settings_ambient_display_label">Ambient Display</string>
+    <string name="quick_settings_nfc_label">NFC</string>
+    
     <!-- Weather string format in expanded statusbar header -->
     <string name="status_bar_expanded_header_weather_format"><xliff:g id="temp">%1$s</xliff:g> - <xliff:g id="condition">%2$s</xliff:g></string>
     <string name="weather_info_not_available">Weather informations not available</string>
