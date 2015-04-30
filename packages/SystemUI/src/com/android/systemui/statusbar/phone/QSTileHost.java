@@ -321,7 +321,6 @@ public class QSTileHost implements QSTile.Host {
                 return new LedTile(this);
             case QSConstants.TILE_REBOOT:
                 return new RebootTile(this);
-                default:
             case QSConstants.TILE_HEADS_UP:
                 return new HeadsUpTile(this);
             default:
