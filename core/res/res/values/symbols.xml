@@ -2177,4 +2177,19 @@
 
    <!-- Doze invert -->
   <java-symbol type="bool" name="config_invert_colors_on_doze" />
+
+   <!-- Privacy Guard -->
+  <java-symbol type="string" name="privacy_guard_notification" />
+  <java-symbol type="string" name="privacy_guard_notification_detail" />
+  <java-symbol type="string" name="privacy_guard_custom_notification_detail" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_light" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_off" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom_light" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_plus" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_plus_light" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_off_plus" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom_plus" />
+  <java-symbol type="drawable" name="stat_notify_privacy_guard_custom_plus_light" />
 </resources>
