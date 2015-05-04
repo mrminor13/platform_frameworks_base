@@ -2164,11 +2164,6 @@
   <java-symbol type="array" name="config_disabledComponents" />
   <java-symbol type="array" name="config_forceEnabledComponents" />
 
-  <!-- kill app long press back -->
-
-  <java-symbol type="string" name="app_killed_message" />
-  <java-symbol type="integer" name="config_backKillTimeout" />
-
   <!-- Power menu reboot -->
   <java-symbol name="reboot_confirm" type="string" />
   <java-symbol name="reboot_title" type="string" />
@@ -2192,4 +2187,5 @@
   <java-symbol type="drawable" name="stat_notify_privacy_guard_off_plus" />
   <java-symbol type="drawable" name="stat_notify_privacy_guard_custom_plus" />
   <java-symbol type="drawable" name="stat_notify_privacy_guard_custom_plus_light" />
+
 </resources>
