@@ -2925,6 +2925,12 @@ public final class Settings {
                 "status_bar_show_battery_percent";
 
         /**
+         * Boolean value on whether to show weather in the statusbar
+	 * @hide
+         */
+        public static final String STATUS_BAR_SHOW_WEATHER = "status_bar_show_weather";
+
+        /**
          * Show or hide clock
          * 0 - hide
          * 1 - show (default)
