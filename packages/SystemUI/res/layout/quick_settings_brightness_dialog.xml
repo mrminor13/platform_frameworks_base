@@ -25,7 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginEnd="8dp"
-        android:src="@drawable/ic_qs_brightness_auto_off"
+        android:src="@drawable/ic_qs_brightness_auto_off_alpha"
         android:contentDescription="@null"
         android:visibility="gone" />
 
