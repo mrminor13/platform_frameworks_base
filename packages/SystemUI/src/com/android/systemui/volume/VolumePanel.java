@@ -80,6 +80,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import android.database.ContentObserver;
+import android.provider.Settings;
 
 /**
  * Handles the user interface for the volume keys.
@@ -284,7 +286,7 @@ public class VolumePanel extends Handler implements DemoMode {
         @Override
         public void onChange(boolean selfChange) {
             mVolumeAdjustSound = Settings.System.getInt(mContext.getContentResolver(),
-                    Settings.System.VOLUME_ADJUST_SOUND, 1) == 1;
+                    Settings.System.VOLUME_ADJUST_SOUND_ENABLED, 1) == 1;
             mLinkNotificationWithVolume = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
             createSliders();
@@ -458,14 +460,14 @@ public class VolumePanel extends Handler implements DemoMode {
         mVoiceCapable = context.getResources().getBoolean(R.bool.config_voice_capable);
 
         mVolumeAdjustSound = Settings.System.getInt(mContext.getContentResolver(),
-                Settings.System.VOLUME_ADJUST_SOUND, 1) == 1;
+                Settings.System.VOLUME_ADJUST_SOUND_ENABLED, 1) == 1;
         mLinkNotificationWithVolume = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.VOLUME_LINK_NOTIFICATION, 1) == 1;
         mExtendedPanelExpanded = Settings.System.getInt(mContext.getContentResolver(),
                 Settings.System.VOLUME_PANEL_EXPANDED, 0) == 1;
 
         context.getContentResolver().registerContentObserver(
-                Settings.System.getUriFor(Settings.System.VOLUME_ADJUST_SOUND), false,
+                Settings.System.getUriFor(Settings.System.VOLUME_ADJUST_SOUND_ENABLED), false,
                 mSettingsObserver);
         context.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.VOLUME_LINK_NOTIFICATION), false,

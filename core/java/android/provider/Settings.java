@@ -2584,6 +2584,12 @@ public final class Settings {
          */
         @Deprecated
         public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
+        
+         /**
+         * Whether the volume slider adjust sound is enabled. The value is
+         * boolean (1 or 0).
+         */
+        public static final String VOLUME_ADJUST_SOUND_ENABLED = "volume_adjust_sound_enabled";
 
         /**
          * Whether the notification LED should repeatedly flash when a notification is
