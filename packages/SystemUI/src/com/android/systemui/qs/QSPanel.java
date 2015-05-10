@@ -139,6 +139,9 @@ public class QSPanel extends ViewGroup {
      * Enable/disable brightness slider.
      */
     private boolean showBrightnessSlider() {
+        boolean brightnessSliderEnabled = Settings.Secure.getInt(
+            mContext.getContentResolver(), Settings.Secure.QS_SHOW_BRIGHTNESS_SLIDER,
+                1) == 1;
         ToggleSlider brightnessSlider = (ToggleSlider) findViewById(R.id.brightness_slider);
         if (mBrightnessSliderEnabled) {
             mBrightnessView.setVisibility(VISIBLE);
