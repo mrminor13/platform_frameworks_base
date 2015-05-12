@@ -399,7 +399,6 @@ public class VolumePanel extends Handler implements DemoMode {
             arr.recycle();
         }
 
-        if (parent == null) {
             mDialog = new Dialog(context) {
                 @Override
                 public boolean onTouchEvent(MotionEvent event) {
@@ -407,8 +406,6 @@ public class VolumePanel extends Handler implements DemoMode {
                             sSafetyWarning == null) {
                         forceTimeout(0);
                         return true;
-                    }
-                    return false;
                 }
                 return false;
             }
