@@ -50,4 +50,7 @@
     <!-- expanded tile -->
     <string name="quick_settings_expanded_desktop">Expanded</string>
     <string name="quick_settings_expanded_desktop_off">Normal</string>
+
+    <!-- no interuptions except alarms -->
+    <string name="zen_no_interruptions_but_alarm">No interruptions. Except alarms.</string>
 </resources>

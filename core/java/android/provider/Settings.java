@@ -2609,6 +2609,12 @@ public final class Settings {
          */
         @Deprecated
         public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
+        
+         /**
+         * Whether the volume slider adjust sound is enabled. The value is
+         * boolean (1 or 0).
+         */
+        public static final String VOLUME_ADJUST_SOUND_ENABLED = "volume_adjust_sound_enabled";
 
         /**
          * Whether the notification LED should repeatedly flash when a notification is
@@ -3187,6 +3193,20 @@ public final class Settings {
          * @hide
          */
         public static final String IN_CALL_PROXIMITY_SENSOR = "in_call_proximity_sensor";
+
+        /**
+         * Boolean value whether to link ringtone and notification volume
+         *
+         * @hide
+         */
+        public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
+
+        /**
+         * Boolean value whether to expand the volume panel
+         *
+         * @hide
+         */
+        public static final String VOLUME_PANEL_EXPANDED = "volume_link_expanded";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
