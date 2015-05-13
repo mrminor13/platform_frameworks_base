@@ -4661,6 +4661,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final long origId = Binder.clearCallingIdentity();
+            wtoken.inPendingTransaction = false;
             setTokenVisibilityLocked(wtoken, null, visible, AppTransition.TRANSIT_UNSET,
                     true, wtoken.voiceInteraction);
             wtoken.updateReportedVisibilityLocked();
@@ -6209,7 +6210,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     if (ws.mAppToken != null && ws.mAppToken.token == appToken &&
-                            ws.isDisplayedLw()) {
+                            ws.isDisplayedLw() && winAnim.mSurfaceShown) {
                         screenshotReady = true;
                     }
                 }

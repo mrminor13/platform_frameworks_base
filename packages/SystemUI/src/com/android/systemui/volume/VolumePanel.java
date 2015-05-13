@@ -167,6 +167,8 @@ public class VolumePanel extends Handler implements DemoMode {
     private final View mView;
     /** Dialog hosting the panel */
     private final Dialog mDialog;
+    /** Parent view hosting the panel, if embedded */
+    private ViewGroup mParent = null;
 
     /** The visible portion of the volume overlay */
     private final ViewGroup mPanel;
@@ -178,6 +180,7 @@ public class VolumePanel extends Handler implements DemoMode {
     private ComponentName mNotificationEffectsSuppressor;
 
     private Callback mCallback;
+    private ZenModePanel.Callback mZenPanelCallback;
 
     /** Currently active stream that shows up at the top of the list of sliders */
     private int mActiveStreamType = -1;
@@ -367,9 +370,10 @@ public class VolumePanel extends Handler implements DemoMode {
         };
     }
 
-    public VolumePanel(Context context, ZenModeController zenController) {
+    public VolumePanel(Context context, ViewGroup parent, ZenModeController zenController) {
         mTag = String.format("%s.%08x", TAG, hashCode());
         mContext = context;
+        mParent = parent;
         mZenController = zenController;
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mAccessibilityManager = (AccessibilityManager) context.getSystemService(
@@ -395,13 +399,13 @@ public class VolumePanel extends Handler implements DemoMode {
             arr.recycle();
         }
 
-        mDialog = new Dialog(context) {
-            @Override
-            public boolean onTouchEvent(MotionEvent event) {
-                if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE &&
-                        sSafetyWarning == null) {
-                    forceTimeout(0);
-                    return true;
+            mDialog = new Dialog(context) {
+                @Override
+                public boolean onTouchEvent(MotionEvent event) {
+                    if (isShowing() && event.getAction() == MotionEvent.ACTION_OUTSIDE &&
+                            sSafetyWarning == null) {
+                        forceTimeout(0);
+                        return true;
                 }
                 return false;
             }
@@ -504,6 +508,11 @@ public class VolumePanel extends Handler implements DemoMode {
         mSliderPanelExpand.setGravity(Gravity.TOP);
 
         registerReceiver();
+
+    }
+
+    public VolumePanel(Context context, ZenModeController zenController) {
+        this(context, null, zenController);
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
@@ -514,12 +523,15 @@ public class VolumePanel extends Handler implements DemoMode {
     }
 
     private void updateWidth() {
-        final Resources res = mContext.getResources();
-        final LayoutParams lp = mDialog.getWindow().getAttributes();
-        lp.width = res.getDimensionPixelSize(com.android.systemui.R.dimen.notification_panel_width);
-        lp.gravity =
-                res.getInteger(com.android.systemui.R.integer.notification_panel_layout_gravity);
-        mDialog.getWindow().setAttributes(lp);
+        if (mDialog != null) {
+            final Resources res = mContext.getResources();
+            final LayoutParams lp = mDialog.getWindow().getAttributes();
+            lp.width = res.getDimensionPixelSize(
+                    com.android.systemui.R.dimen.notification_panel_width);
+            lp.gravity = res.getInteger(
+                    com.android.systemui.R.integer.notification_panel_layout_gravity);
+            mDialog.getWindow().setAttributes(lp);
+        }
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -562,6 +574,10 @@ public class VolumePanel extends Handler implements DemoMode {
         }
     }
 
+    public View getContentView() {
+        return mView;
+    }
+
     private void initZenModePanel() {
         mZenPanel.init(mZenController);
         mZenPanel.setCallback(new ZenModePanel.Callback() {
@@ -570,11 +586,18 @@ public class VolumePanel extends Handler implements DemoMode {
                 if (mCallback != null) {
                     mCallback.onZenSettings();
                 }
+
+                if (mZenPanelCallback != null) {
+                    mZenPanelCallback.onMoreSettings();
+                }
             }
 
             @Override
             public void onInteraction() {
                 resetTimeout();
+                if (mZenPanelCallback != null) {
+                    mZenPanelCallback.onInteraction();
+                }
             }
 
             @Override
@@ -974,6 +997,10 @@ public class VolumePanel extends Handler implements DemoMode {
         mCallback = callback;
     }
 
+    public void setZenModePanelCallback(ZenModePanel.Callback callback) {
+        mZenPanelCallback = callback;
+    }
+
     private void updateTimeoutDelay() {
         mTimeoutDelay = mDemoIcon != 0 ? TIMEOUT_DELAY_EXPANDED
                 : sSafetyWarning != null ? TIMEOUT_DELAY_SAFETY_WARNING
@@ -1002,7 +1029,7 @@ public class VolumePanel extends Handler implements DemoMode {
         }
     }
 
-    private void updateStates() {
+    public void updateStates() {
         final int count = mSliderPanel.getChildCount();
         for (int i = 0; i < count; i++) {
             StreamControl sc = (StreamControl) mSliderPanel.getChildAt(i).getTag();
@@ -1306,7 +1333,8 @@ public class VolumePanel extends Handler implements DemoMode {
     }
 
     private boolean isShowing() {
-        return mDialog.isShowing();
+        //Return whether parent view is currently attached to a window if mDialog is null
+        return (mDialog != null) ? mDialog.isShowing() : mParent.isAttachedToWindow();
     }
 
     protected void onPlaySound(int streamType, int flags) {

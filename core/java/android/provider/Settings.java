@@ -1255,6 +1255,11 @@ public final class Settings {
 
             // At one time in System, then Global, but now back in Secure
             MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
+
+            /* Terminus CHANGES */
+            MOVED_TO_SECURE.add(Secure.QS_TILES);
+            MOVED_TO_SECURE.add(Secure.QS_USE_MAIN_TILES);
+            MOVED_TO_SECURE.add(Secure.QS_SHOW_BRIGHTNESS_SLIDER);
         }
 
         private static final HashSet<String> MOVED_TO_GLOBAL;
@@ -2082,6 +2087,26 @@ public final class Settings {
          * @hide
          */
         public static final String STATUS_BAR_TICKER_ENABLED = "status_bar_ticker_enabled";
+
+        /** Whether to show the brightness slider in quick settings panel.
+         *
+         * @hide
+         */
+        public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
+
+        /**
+         * Deprecated Use {@link android.provider.Settings.Secure.QS_TILES}
+         * @hide
+         */
+        @Deprecated
+        public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
+         * Deprecated Use {@link android.provider.Settings.Secure.QS_USE_MAIN_TILES}
+         * @hide
+         */
+        @Deprecated
+        public static final String QS_USE_MAIN_TILES = "sysui_qs_main_tiles";
 
         /**
          * Timeout for ambient display notification
@@ -3054,6 +3079,18 @@ public final class Settings {
          * @hide
          */
         public static final String STATUSBAR_CLOCK_DATE_FORMAT = "statusbar_clock_date_format";
+
+        /** Whether to collapse panel when quick settings tile is pressed.
+         *
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_COLLAPSE_PANEL = "quick_settings_collapse_panel";
+
+        /** Whether to vibrate when quick settings tile is pressed.
+         *
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES_VIBRATE = "quick_settings_vibrate";
 
         /**
          * MediaScanner behavior on boot.
@@ -5414,6 +5451,44 @@ public final class Settings {
          * @hide
          */
         public static final String ADVANCED_REBOOT = "advanced_reboot";
+
+        /**
+        /** Whether to show the brightness slider in quick settings panel.
+         *
+         * @hide
+         */
+        public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
+
+        /**
+         * List of QS tile names
+         * @hide
+         */
+        public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
+         * Use "main" tiles on the first row of the quick settings panel
+         * 0 = no, 1 = yes
+         * @hide
+         */
+        public static final String QS_USE_MAIN_TILES = "sysui_qs_main_tiles";
+
+        /**
+         * Whether to show detail view for the wi-fi tile
+         * @hide
+         */
+        public static final String QS_WIFI_DETAIL = "qs_wifi_detail";
+
+        /**
+         * Whether detail view for the location tile is enabled
+         * @hide
+         */
+        public static final String QS_LOCATION_ADVANCED = "qs_location_advanced";
+
+        /**
+         * Whether to show four tiles per row.
+         * @hide
+         */
+        public static final String QS_USE_FOUR_COLUMNS = "qs_use_four_columns";
 
         /**
          * This are the settings to be backed up.
