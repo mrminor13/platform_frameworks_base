@@ -175,6 +175,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final String ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED =
             "android.net.ConnectivityService.action.PKT_CNT_SAMPLE_INTERVAL_ELAPSED";
 
+    private static final String EXTRA_NETWORK_TYPE = "netType";
+
+    private static final String EXTRA_NETID = "netID";
+
+    private static final int EVENT_DEFAULT_NETWORK_SWITCH = 540670;
+
     private static final int SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE = 0;
 
     // How long to delay to removal of a pending intent based request.
