@@ -60,4 +60,6 @@ interface IPowerManager
     void setAttentionLight(boolean on, int color);
 
 	void wakeUpWithProximityCheck(long time);
+    // blocked wakelock support
+    String getSeenWakeLocks();
 }
