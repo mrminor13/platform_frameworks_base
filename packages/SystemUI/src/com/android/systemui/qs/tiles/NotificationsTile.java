@@ -51,7 +51,6 @@ import com.android.systemui.volume.ZenModePanel;
 
 /** Quick settings tile: Notifications **/
 public class NotificationsTile extends QSTile<NotificationsTile.NotificationsState> {
-    private static final Intent SOUND_SETTINGS = new Intent(Settings.ACTION_SOUND_SETTINGS);
     private final ZenModeController mZenController;
     private final AudioManager mAudioManager;
     private final Vibrator mVibrator;
@@ -62,9 +61,11 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
         AudioManager.RINGER_MODE_NORMAL,
         AudioManager.RINGER_MODE_VIBRATE,
         AudioManager.RINGER_MODE_SILENT,
+        AudioManager.RINGER_MODE_NORMAL,
         AudioManager.RINGER_MODE_SILENT
     };
     private static final int[] ZENS = new int[] {
+        Global.ZEN_MODE_OFF,
         Global.ZEN_MODE_OFF,
         Global.ZEN_MODE_OFF,
         Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS,
@@ -124,16 +125,16 @@ public class NotificationsTile extends QSTile<NotificationsTile.NotificationsSta
         mZenController.setZen(zenMode);
     }
 
-    @Override
-    protected void handleLongClick() {
-        super.handleLongClick();
-        showDetail(true);
-    }
+//    @Override
+//    protected void handleLongClick() {
+//        super.handleLongClick();
+//        showDetail(true);
+//    }
 
-    @Override
-    protected void handleSecondaryClick() {
-        showDetail(true);
-    }
+//    @Override
+//    protected void handleSecondaryClick() {
+//        showDetail(true);
+//    }
 
     @Override
     protected void handleUpdateState(NotificationsState state, Object arg) {
