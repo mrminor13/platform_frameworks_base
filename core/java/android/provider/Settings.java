@@ -1781,6 +1781,18 @@ public final class Settings {
          */
         public static final int END_BUTTON_BEHAVIOR_DEFAULT = END_BUTTON_BEHAVIOR_SLEEP;
 
+	/**
+	 * Enable blocking wakelock
+	 * @hide
+	 */
+	public static final String WAKELOCK_BLOCKING_ENABLED = "wakelock_blocking_enabled";
+
+	/**
+	 * List of wakelock blocks selected
+	 * @hide
+	 */
+	public static final String WAKELOCK_BLOCKING_LIST = "wakelock_blocking_list";
+
         /**
          * Is advanced settings mode turned on. 0 == no, 1 == yes
          * @hide
@@ -5961,6 +5973,12 @@ public final class Settings {
          * Whether ADB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
+
+        /**
+         * String to contain power menu actions
+         * @hide
+         */
+        public static final String POWER_MENU_ACTIONS = "power_menu_actions";
 
         /**
          * Whether Views are allowed to save their attribute data.
