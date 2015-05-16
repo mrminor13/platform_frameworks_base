@@ -383,6 +383,21 @@ public class AudioManager {
      */
     @Deprecated public static final int NUM_STREAMS = AudioSystem.NUM_STREAMS;
 
+
+    /**  @hide Default volume index values for audio streams */
+    public static final int[] DEFAULT_STREAM_VOLUME = new int[] {
+        4,  // STREAM_VOICE_CALL
+        7,  // STREAM_SYSTEM
+        5,  // STREAM_RING
+        22, // STREAM_MUSIC
+        6,  // STREAM_ALARM
+        5,  // STREAM_NOTIFICATION
+        14, // STREAM_BLUETOOTH_SCO
+        7,  // STREAM_SYSTEM_ENFORCED
+        22, // STREAM_DTMF
+        22  // STREAM_TTS
+    };
+
     /**
      * Increase the ringer volume.
      *
@@ -764,16 +779,14 @@ public class AudioManager {
                  * Play a sound. This is done on key up since we don't want the
                  * sound to play when a user holds down volume down to mute.
                  */
-                if (mUseVolumeKeySounds) {
-                    if (mUseMasterVolume) {
-                        adjustMasterVolume(ADJUST_SAME, FLAG_PLAY_SOUND);
-                    } else {
-                        int flags = FLAG_PLAY_SOUND;
-                        adjustSuggestedStreamVolume(
-                                ADJUST_SAME,
-                                stream,
-                                flags);
-                    }
+                if (mUseMasterVolume) {
+                    adjustMasterVolume(ADJUST_SAME, FLAG_PLAY_SOUND);
+                } else {
+                    int flags = FLAG_PLAY_SOUND;
+                    adjustSuggestedStreamVolume(
+                            ADJUST_SAME,
+                            stream,
+                            flags);
                 }
                 mVolumeKeyUpTime = SystemClock.uptimeMillis();
                 break;

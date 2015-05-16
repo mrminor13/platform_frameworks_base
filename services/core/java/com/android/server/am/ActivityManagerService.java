@@ -10067,10 +10067,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             } finally {
                 // Ensure that whatever happens, we clean up the identity state
                 sCallerIdentity.remove();
+                // Ensure we're done with the provider.
+                removeContentProviderExternalUnchecked(name, null, userId);
             }
-
-            // We've got the fd now, so we're done with the provider.
-            removeContentProviderExternalUnchecked(name, null, userId);
         } else {
             Slog.d(TAG, "Failed to get provider for authority '" + name + "'");
         }
@@ -14902,7 +14901,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        for (int i=0; i<cpr.connections.size(); i++) {
+        for (int i = cpr.connections.size() - 1; i >= 0; i--) {
             ContentProviderConnection conn = cpr.connections.get(i);
             if (conn.waiting) {
                 // If this connection is waiting for the provider, then we don't
@@ -14994,10 +14993,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean restart = false;
 
         // Remove published content providers.
-        for (int i=app.pubProviders.size()-1; i>=0; i--) {
+        for (int i = app.pubProviders.size() - 1; i >= 0; i--) {
             ContentProviderRecord cpr = app.pubProviders.valueAt(i);
             final boolean always = app.bad || !allowRestart;
-            if (removeDyingProviderLocked(app, cpr, always) || always) {
+            boolean inLaunching = removeDyingProviderLocked(app, cpr, always);
+            if ((inLaunching || always) && cpr.hasConnectionOrHandle()) {
                 // We left the provider in the launching list, need to
                 // restart it.
                 restart = true;
@@ -15015,7 +15015,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         // Unregister from connected content providers.
         if (!app.conProviders.isEmpty()) {
-            for (int i=0; i<app.conProviders.size(); i++) {
+            for (int i = app.conProviders.size() - 1; i >= 0; i--) {
                 ContentProviderConnection conn = app.conProviders.get(i);
                 conn.provider.connections.remove(conn);
                 stopAssociationLocked(app.uid, app.processName, conn.provider.uid,
@@ -15030,9 +15030,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         // XXX Commented out for now.  Trying to figure out a way to reproduce
         // the actual situation to identify what is actually going on.
         if (false) {
-            for (int i=0; i<mLaunchingProviders.size(); i++) {
-                ContentProviderRecord cpr = (ContentProviderRecord)
-                        mLaunchingProviders.get(i);
+            for (int i = mLaunchingProviders.size() - 1; i >= 0; i--) {
+                ContentProviderRecord cpr = mLaunchingProviders.get(i);
                 if (cpr.connections.size() <= 0 && !cpr.hasExternalProcessHandles()) {
                     synchronized (cpr) {
                         cpr.launchingApp = null;
@@ -15045,7 +15044,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         skipCurrentReceiverLocked(app);
 
         // Unregister any receivers.
-        for (int i=app.receivers.size()-1; i>=0; i--) {
+        for (int i = app.receivers.size() - 1; i >= 0; i--) {
             removeReceiverLocked(app.receivers.valueAt(i));
         }
         app.receivers.clear();
@@ -15063,7 +15062,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        for (int i = mPendingProcessChanges.size()-1; i>=0; i--) {
+        for (int i = mPendingProcessChanges.size() - 1; i >= 0; i--) {
             ProcessChangeItem item = mPendingProcessChanges.get(i);
             if (item.pid == app.pid) {
                 mPendingProcessChanges.remove(i);
@@ -15138,18 +15137,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         // and if any run in this process then either schedule a restart of
         // the process or kill the client waiting for it if this process has
         // gone bad.
-        int NL = mLaunchingProviders.size();
         boolean restart = false;
-        for (int i=0; i<NL; i++) {
+        for (int i = mLaunchingProviders.size() - 1; i >= 0; i--) {
             ContentProviderRecord cpr = mLaunchingProviders.get(i);
             if (cpr.launchingApp == app) {
-                if (!alwaysBad && !app.bad) {
+                if (!alwaysBad && !app.bad && cpr.hasConnectionOrHandle()) {
                     restart = true;
                 } else {
                     removeDyingProviderLocked(app, cpr, true);
-                    // cpr should have been removed from mLaunchingProviders
-                    NL = mLaunchingProviders.size();
-                    i--;
                 }
             }
         }
@@ -15613,30 +15608,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     // BROADCASTS
     // =========================================================
 
-    private final List getStickiesLocked(String action, IntentFilter filter,
-            List cur, int userId) {
-        final ContentResolver resolver = mContext.getContentResolver();
-        ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
-        if (stickies == null) {
-            return cur;
-        }
-        final ArrayList<Intent> list = stickies.get(action);
-        if (list == null) {
-            return cur;
-        }
-        int N = list.size();
-        for (int i=0; i<N; i++) {
-            Intent intent = list.get(i);
-            if (filter.match(resolver, intent, true, TAG) >= 0) {
-                if (cur == null) {
-                    cur = new ArrayList<Intent>();
-                }
-                cur.add(intent);
-            }
-        }
-        return cur;
-    }
-
     boolean isPendingBroadcastProcessLocked(int pid) {
         return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
                 || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid);
@@ -15661,10 +15632,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission, int userId) {
         enforceNotIsolatedCaller("registerReceiver");
+        ArrayList<Intent> stickyIntents = null;
+        ProcessRecord callerApp = null;
         int callingUid;
         int callingPid;
         synchronized(this) {
-            ProcessRecord callerApp = null;
             if (caller != null) {
                 callerApp = getRecordForAppLocked(caller);
                 if (callerApp == null) {
@@ -15687,39 +15659,66 @@ public final class ActivityManagerService extends ActivityManagerNative
                 callingPid = Binder.getCallingPid();
             }
 
-            userId = this.handleIncomingUser(callingPid, callingUid, userId,
+            userId = handleIncomingUser(callingPid, callingUid, userId,
                     true, ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
-            List allSticky = null;
+            Iterator<String> actions = filter.actionsIterator();
+            if (actions == null) {
+                ArrayList<String> noAction = new ArrayList<String>(1);
+                noAction.add(null);
+                actions = noAction.iterator();
+            }
 
-            // Look for any matching sticky broadcasts...
-            Iterator actions = filter.actionsIterator();
-            if (actions != null) {
-                while (actions.hasNext()) {
-                    String action = (String)actions.next();
-                    allSticky = getStickiesLocked(action, filter, allSticky,
-                            UserHandle.USER_ALL);
-                    allSticky = getStickiesLocked(action, filter, allSticky,
-                            UserHandle.getUserId(callingUid));
+            // Collect stickies of users
+            int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
+            while (actions.hasNext()) {
+                String action = actions.next();
+                for (int id : userIds) {
+                    ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(id);
+                    if (stickies != null) {
+                        ArrayList<Intent> intents = stickies.get(action);
+                        if (intents != null) {
+                            if (stickyIntents == null) {
+                                stickyIntents = new ArrayList<Intent>();
+                            }
+                            stickyIntents.addAll(intents);
+                        }
+                    }
                 }
-            } else {
-                allSticky = getStickiesLocked(null, filter, allSticky,
-                        UserHandle.USER_ALL);
-                allSticky = getStickiesLocked(null, filter, allSticky,
-                        UserHandle.getUserId(callingUid));
             }
+        }
 
-            // The first sticky in the list is returned directly back to
-            // the client.
-            Intent sticky = allSticky != null ? (Intent)allSticky.get(0) : null;
-
-            if (DEBUG_BROADCAST) Slog.v(TAG, "Register receiver " + filter
-                    + ": " + sticky);
-
-            if (receiver == null) {
-                return sticky;
+        ArrayList<Intent> allSticky = null;
+        if (stickyIntents != null) {
+            final ContentResolver resolver = mContext.getContentResolver();
+            // Look for any matching sticky broadcasts...
+            for (int i = 0, N = stickyIntents.size(); i < N; i++) {
+                Intent intent = stickyIntents.get(i);
+                // If intent has scheme "content", it will need to acccess
+                // provider that needs to lock mProviderMap in ActivityThread
+                // and also it may need to wait application response, so we
+                // cannot lock ActivityManagerService here.
+                if (filter.match(resolver, intent, true, TAG) >= 0) {
+                    if (allSticky == null) {
+                        allSticky = new ArrayList<Intent>();
+                    }
+                    allSticky.add(intent);
+                }
             }
+        }
 
+        // The first sticky in the list is returned directly back to the client.
+        Intent sticky = allSticky != null ? allSticky.get(0) : null;
+        if (DEBUG_BROADCAST) Slog.v(TAG, "Register receiver " + filter + ": " + sticky);
+        if (receiver == null) {
+            return sticky;
+        }
+
+        synchronized (this) {
+            if (callerApp != null && callerApp.pid == 0) {
+                // Caller already died
+                return null;
+            }
             ReceiverList rl
                 = (ReceiverList)mRegisteredReceivers.get(receiver.asBinder());
             if (rl == null) {
@@ -17716,6 +17715,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mPendingPssProcesses.clear();
         for (int i=mLruProcesses.size()-1; i>=0; i--) {
             ProcessRecord app = mLruProcesses.get(i);
+            if (app.thread == null || app.curProcState < 0) {
+                continue;
+            }
             if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
                 app.pssProcState = app.setProcState;
                 app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,

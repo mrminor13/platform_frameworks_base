@@ -128,10 +128,10 @@ public class AudioService extends IAudioService.Stub {
     private static final boolean DEBUG_SESSIONS = Log.isLoggable(TAG + ".SESSIONS", Log.DEBUG);
 
     /** Allow volume changes to set ringer mode to silent? */
-    private static final boolean VOLUME_SETS_RINGER_MODE_SILENT = false;
+    private static final boolean VOLUME_SETS_RINGER_MODE_SILENT = true;
 
     /** In silent mode, are volume adjustments (raises) prevented? */
-    private static final boolean PREVENT_VOLUME_ADJUSTMENT_IF_SILENT = true;
+    private static final boolean PREVENT_VOLUME_ADJUSTMENT_IF_SILENT = false;
 
     /** How long to delay before persisting a change in volume/ringer mode. */
     private static final int PERSIST_DELAY = 500;
@@ -255,13 +255,13 @@ public class AudioService extends IAudioService.Stub {
         5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         7,  // STREAM_RING
-        15, // STREAM_MUSIC
+        30, // STREAM_MUSIC
         7,  // STREAM_ALARM
         7,  // STREAM_NOTIFICATION
-        15, // STREAM_BLUETOOTH_SCO
+        30, // STREAM_BLUETOOTH_SCO
         7,  // STREAM_SYSTEM_ENFORCED
-        15, // STREAM_DTMF
-        15  // STREAM_TTS
+        30, // STREAM_DTMF
+        30  // STREAM_TTS
     };
 
     private static int[] DEFAULT_STREAM_VOLUME = new int[] {
@@ -356,6 +356,8 @@ public class AudioService extends IAudioService.Stub {
             "STREAM_DTMF",
             "STREAM_TTS"
     };
+
+    private boolean mLinkNotificationWithVolume;
 
     private final AudioSystem.ErrorCallback mAudioSystemCallback = new AudioSystem.ErrorCallback() {
         public void onError(int error) {
@@ -528,6 +530,7 @@ public class AudioService extends IAudioService.Stub {
 
     // Reference to BluetoothA2dp to query for AbsoluteVolume.
     private BluetoothA2dp mA2dp;
+    // lock always taken synchronized on mConnectedDevices
     private final Object mA2dpAvrcpLock = new Object();
     // If absolute volume is supported in AVRCP device
     private boolean mAvrcpAbsVolSupported = false;
@@ -621,6 +624,9 @@ public class AudioService extends IAudioService.Stub {
                 com.android.internal.R.bool.config_useMasterVolume);
         mMasterVolumeRamp = context.getResources().getIntArray(
                 com.android.internal.R.array.config_masterVolumeRamp);
+
+        mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
+                Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
 
         // must be called before readPersistedSettings() which needs a valid mStreamVolumeAlias[]
         // array initialized by updateStreamVolumeAlias()
@@ -836,6 +842,13 @@ public class AudioService extends IAudioService.Stub {
         }
 
         mStreamVolumeAlias[AudioSystem.STREAM_DTMF] = dtmfStreamAlias;
+
+        if (mLinkNotificationWithVolume) {
+            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+        } else {
+            mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
+        }
+
         if (updateVolumes) {
             mStreamStates[AudioSystem.STREAM_DTMF].setAllIndexes(mStreamStates[dtmfStreamAlias]);
             // apply stream mute states according to new value of mRingerModeAffectedStreams
@@ -1963,6 +1976,15 @@ public class AudioService extends IAudioService.Stub {
                             }
                         }
                     }
+                    // Post a persist volume msg to save that changed volume
+                    int device = getDeviceForStream(streamType);
+                    sendMsg(mAudioHandler,
+                        MSG_PERSIST_VOLUME,
+                        SENDMSG_QUEUE,
+                        device,
+                        0,
+                        mStreamStates[streamType],
+                        PERSIST_DELAY);
                 }
                 mStreamStates[streamType].mute(null, false);
                 mRingerModeMutedStreams &= ~(1 << streamType);
@@ -2901,12 +2923,12 @@ public class AudioService extends IAudioService.Stub {
             List<BluetoothDevice> deviceList;
             switch(profile) {
             case BluetoothProfile.A2DP:
-                synchronized (mA2dpAvrcpLock) {
-                    mA2dp = (BluetoothA2dp) proxy;
-                    deviceList = mA2dp.getConnectedDevices();
-                    if (deviceList.size() > 0) {
-                        btDevice = deviceList.get(0);
-                        synchronized (mConnectedDevices) {
+                synchronized (mConnectedDevices) {
+                    synchronized (mA2dpAvrcpLock) {
+                        mA2dp = (BluetoothA2dp) proxy;
+                        deviceList = mA2dp.getConnectedDevices();
+                        if (deviceList.size() > 0) {
+                            btDevice = deviceList.get(0);
                             int state = mA2dp.getConnectionState(btDevice);
                             int delay = checkSendBecomingNoisyIntent(
                                                 AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
@@ -3001,9 +3023,9 @@ public class AudioService extends IAudioService.Stub {
         public void onServiceDisconnected(int profile) {
             switch(profile) {
             case BluetoothProfile.A2DP:
-                synchronized (mA2dpAvrcpLock) {
-                    mA2dp = null;
-                    synchronized (mConnectedDevices) {
+                synchronized (mConnectedDevices) {
+                    synchronized (mA2dpAvrcpLock) {
+                        mA2dp = null;
                         if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
                             makeA2dpDeviceUnavailableNow(
                                     mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
@@ -3123,6 +3145,9 @@ public class AudioService extends IAudioService.Stub {
     private int checkForRingerModeChange(int oldIndex, int direction,  int step) {
         int result = FLAG_ADJUST_VOLUME;
         int ringerMode = getRingerModeInternal();
+
+        if (DEBUG_VOL)
+            Log.d(TAG, "checkForRingerModeChange oldIndex = " + oldIndex + " direction = " + direction + " step = " + step + " mPrevVolDirection = " + mPrevVolDirection);
 
         switch (ringerMode) {
         case RINGER_MODE_NORMAL:
@@ -4488,6 +4513,8 @@ public class AudioService extends IAudioService.Stub {
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.VOLUME_KEYS_CONTROL_MEDIA_STREAM), false, this,
                 UserHandle.USER_ALL);
+            mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                Settings.System.VOLUME_LINK_NOTIFICATION), false, this);
         }
 
         @Override
@@ -4518,6 +4545,14 @@ public class AudioService extends IAudioService.Stub {
                 } else if (uri.equals(Settings.Global.getUriFor(
                     Settings.Global.DOCK_AUDIO_MEDIA_ENABLED))) {
                     readDockAudioSettings(mContentResolver);
+                }
+
+                mLinkNotificationWithVolume = Settings.System.getIntForUser(mContentResolver,
+                        Settings.System.VOLUME_LINK_NOTIFICATION, 1, UserHandle.USER_CURRENT) == 1;
+                if (mLinkNotificationWithVolume) {
+                    mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
+                } else {
+                    mStreamVolumeAlias[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
                 }
             }
         }

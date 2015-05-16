@@ -1578,7 +1578,7 @@
     <!-- Safe headphone volume index. When music stream volume is below this index
     the SPL on headphone output is compliant to EN 60950 requirements for portable music
     players. -->
-    <integer name="config_safe_media_volume_index">10</integer>
+    <integer name="config_safe_media_volume_index">20</integer>
 
     <!-- Configure mobile network MTU. The standard default is set here but each carrier
          may have a specific value set in an overlay config.xml file. -->
@@ -2013,10 +2013,10 @@
     </string-array>
 
     <!-- Show the next-alarm as a zen exit condition if it occurs in the next n hours. -->
-    <integer name="config_next_alarm_condition_lookahead_threshold_hrs">12</integer>
+    <integer name="config_next_alarm_condition_lookahead_threshold_hrs">24</integer>
 
     <!-- Show downtime as a zen exit condition if it starts in the next n hours. -->
-    <integer name="config_downtime_condition_lookahead_threshold_hrs">4</integer>
+    <integer name="config_downtime_condition_lookahead_threshold_hrs">12</integer>
 
     <!-- Flags enabling default window features. See Window.java -->
     <bool name="config_defaultWindowFeatureOptionsPanel">true</bool>

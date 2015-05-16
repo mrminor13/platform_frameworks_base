@@ -1255,6 +1255,11 @@ public final class Settings {
 
             // At one time in System, then Global, but now back in Secure
             MOVED_TO_SECURE.add(Secure.INSTALL_NON_MARKET_APPS);
+
+            /* Terminus CHANGES */
+            MOVED_TO_SECURE.add(Secure.QS_TILES);
+            MOVED_TO_SECURE.add(Secure.QS_USE_MAIN_TILES);
+            MOVED_TO_SECURE.add(Secure.QS_SHOW_BRIGHTNESS_SLIDER);
         }
 
         private static final HashSet<String> MOVED_TO_GLOBAL;
@@ -1776,6 +1781,18 @@ public final class Settings {
          */
         public static final int END_BUTTON_BEHAVIOR_DEFAULT = END_BUTTON_BEHAVIOR_SLEEP;
 
+	/**
+	 * Enable blocking wakelock
+	 * @hide
+	 */
+	public static final String WAKELOCK_BLOCKING_ENABLED = "wakelock_blocking_enabled";
+
+	/**
+	 * List of wakelock blocks selected
+	 * @hide
+	 */
+	public static final String WAKELOCK_BLOCKING_LIST = "wakelock_blocking_list";
+
         /**
          * Is advanced settings mode turned on. 0 == no, 1 == yes
          * @hide
@@ -2083,6 +2100,62 @@ public final class Settings {
          */
         public static final String STATUS_BAR_TICKER_ENABLED = "status_bar_ticker_enabled";
 
+        /** Whether to show the brightness slider in quick settings panel.
+         *
+         * @hide
+         */
+        public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
+
+        /**
+         * Deprecated Use {@link android.provider.Settings.Secure.QS_TILES}
+         * @hide
+         */
+        @Deprecated
+        public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
+         * Deprecated Use {@link android.provider.Settings.Secure.QS_USE_MAIN_TILES}
+         * @hide
+         */
+        @Deprecated
+        public static final String QS_USE_MAIN_TILES = "sysui_qs_main_tiles";
+
+        /**
+         * Timeout for ambient display notification
+         * @hide
+         */
+        public static final String DOZE_TIMEOUT = "doze_timeout";
+
+        /**
+         * Use pick up gesture sensor as doze pulse trigger
+         * @hide
+         */
+        public static final String DOZE_TRIGGER_PICKUP = "doze_trigger_pickup";
+
+        /**
+         * Use significant motion sensor as doze pulse trigger
+         * @hide
+         */
+        public static final String DOZE_TRIGGER_SIGMOTION = "doze_trigger_sigmotion";
+
+        /**
+         * Use notifications as doze pulse triggers
+         * @hide
+         */
+        public static final String DOZE_TRIGGER_NOTIFICATION = "doze_trigger_notification";
+
+        /**
+         * Follow pre-configured doze pulse repeat schedule
+         * @hide
+         */
+        public static final String DOZE_SCHEDULE = "doze_schedule";
+
+        /**
+         * Doze pulse screen brightness level
+         * @hide
+         */
+        public static final String DOZE_BRIGHTNESS = "doze_brightness";
+
         /**
          * Control whether the process CPU usage meter should be shown.
          *
@@ -2198,12 +2271,6 @@ public final class Settings {
          * @hide
          */
         public static final String SWAP_VOLUME_KEYS_ON_ROTATION = "swap_volume_keys_on_rotation";
-
-        /**
-         * Whether or not volume button music controls should be enabled to seek media tracks
-         * @hide
-         */
-        public static final String VOLBTN_MUSIC_CONTROLS = "volbtn_music_controls";
 
         /**
          * Microphone mute (int 1 = mute, 0 = not muted).
@@ -2548,6 +2615,12 @@ public final class Settings {
          */
         @Deprecated
         public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
+        
+         /**
+         * Whether the volume slider adjust sound is enabled. The value is
+         * boolean (1 or 0).
+         */
+        public static final String VOLUME_ADJUST_SOUND_ENABLED = "volume_adjust_sound_enabled";
 
         /**
          * Whether the notification LED should repeatedly flash when a notification is
@@ -3013,6 +3086,18 @@ public final class Settings {
          */
         public static final String STATUSBAR_CLOCK_DATE_FORMAT = "statusbar_clock_date_format";
 
+        /** Whether to collapse panel when quick settings tile is pressed.
+         *
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_COLLAPSE_PANEL = "quick_settings_collapse_panel";
+
+        /** Whether to vibrate when quick settings tile is pressed.
+         *
+         * @hide
+         */
+        public static final String QUICK_SETTINGS_TILES_VIBRATE = "quick_settings_vibrate";
+
         /**
          * MediaScanner behavior on boot.
          * 0 = enabled
@@ -3114,6 +3199,93 @@ public final class Settings {
          * @hide
          */
         public static final String IN_CALL_PROXIMITY_SENSOR = "in_call_proximity_sensor";
+
+        /**
+         *
+         * Volume music controls
+         * @hide
+         */
+        public static final String VOLUME_MUSIC_CONTROLS = "volume_music_controls";
+
+        /**
+         * Boolean value whether to link ringtone and notification volume
+         * @hide
+         */
+        public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
+
+        /**
+         * Boolean value whether to expand the volume panel
+         *
+         * @hide
+         */
+        public static final String VOLUME_PANEL_EXPANDED = "volume_link_expanded";
+
+        /**
+         * Force expanded notifications on all apps that support it.
+         * @hide
+         */
+        public static final String FORCE_EXPANDED_NOTIFICATIONS = "force_expanded_notifications";
+
+        /**
+         * Volume rocker wake
+         * @hide
+         */
+        public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
+
+        /**  
+         * AOKP Custom System Animations
+         * @hide
+         */  
+        public static final String[] ACTIVITY_ANIMATION_CONTROLS = new String[] {
+                "activity_open",
+                "activity_close",
+                "task_open",
+                "task_close",
+                "task_to_front",
+                "task_to_back",
+                "wallpaper_open",
+                "wallpaper_close",
+                "wallpaper_intra_open",
+                "wallpaper_intra_close",
+                "task_open_behind",
+        };  
+        public static final String ANIMATION_CONTROLS_DURATION = "animation_controls_duration";
+
+        /**
+         * Toast animations
+         *
+         * @hide
+         */
+        public static final String TOAST_ANIMATION = "toast_animation";
+
+        /**
+         * ListView Animations
+         * 0 == None
+         * 1 == Wave (Left)
+         * 2 == Wave (Right)
+         * 3 == Scale
+         * 4 == Alpha
+         * 5 == Stack (Top)
+         * 6 == Stack (Bottom)
+         * 7 == Translate (Left)
+         * 8 == Translate (Right)
+         * @hide
+         */
+        public static final String LISTVIEW_ANIMATION = "listview_animation";
+
+        /**
+         * ListView Interpolators
+         * 0 == None
+         * 1 == accelerate_interpolator
+         * 2 == decelerate_interpolator
+         * 3 == accelerate_decelerate_interpolator
+         * 4 == anticipate_interpolator
+         * 5 == overshoot_interpolator
+         * 6 == anticipate_overshoot_interpolator
+         * 7 == bounce_interpolator
+         * @hide
+         */
+        public static final String LISTVIEW_INTERPOLATOR = "listview_interpolator";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
@@ -5245,6 +5417,12 @@ public final class Settings {
          */
         public static final String PRIVACY_GUARD_DEFAULT = "privacy_guard_default";
 
+		/**
+         * Whether to use the custom quick unlock screen control
+         * @hide
+         */
+        public static final String LOCKSCREEN_QUICK_UNLOCK_CONTROL = "lockscreen_quick_unlock_control";
+
         /**
          * Whether privacy guard notification should show.
          * @hide
@@ -5360,6 +5538,44 @@ public final class Settings {
         public static final String ADVANCED_REBOOT = "advanced_reboot";
 
         /**
+        /** Whether to show the brightness slider in quick settings panel.
+         *
+         * @hide
+         */
+        public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
+
+        /**
+         * List of QS tile names
+         * @hide
+         */
+        public static final String QS_TILES = "sysui_qs_tiles";
+
+        /**
+         * Use "main" tiles on the first row of the quick settings panel
+         * 0 = no, 1 = yes
+         * @hide
+         */
+        public static final String QS_USE_MAIN_TILES = "sysui_qs_main_tiles";
+
+        /**
+         * Whether to show detail view for the wi-fi tile
+         * @hide
+         */
+        public static final String QS_WIFI_DETAIL = "qs_wifi_detail";
+
+        /**
+         * Whether detail view for the location tile is enabled
+         * @hide
+         */
+        public static final String QS_LOCATION_ADVANCED = "qs_location_advanced";
+
+        /**
+         * Whether to show four tiles per row.
+         * @hide
+         */
+        public static final String QS_USE_FOUR_COLUMNS = "qs_use_four_columns";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -5412,7 +5628,8 @@ public final class Settings {
             SLEEP_TIMEOUT,
             ADVANCED_REBOOT,          
             PRIVACY_GUARD_DEFAULT,
-            PRIVACY_GUARD_NOTIFICATION
+            PRIVACY_GUARD_NOTIFICATION,
+            LOCKSCREEN_QUICK_UNLOCK_CONTROL
         };
 
         /**
@@ -5804,6 +6021,12 @@ public final class Settings {
          * Whether ADB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
+
+        /**
+         * String to contain power menu actions
+         * @hide
+         */
+        public static final String POWER_MENU_ACTIONS = "power_menu_actions";
 
         /**
          * Whether Views are allowed to save their attribute data.
