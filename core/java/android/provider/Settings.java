@@ -2261,12 +2261,6 @@ public final class Settings {
         public static final String SWAP_VOLUME_KEYS_ON_ROTATION = "swap_volume_keys_on_rotation";
 
         /**
-         * Whether or not volume button music controls should be enabled to seek media tracks
-         * @hide
-         */
-        public static final String VOLBTN_MUSIC_CONTROLS = "volbtn_music_controls";
-
-        /**
          * Microphone mute (int 1 = mute, 0 = not muted).
          *
          * @hide
@@ -3195,8 +3189,14 @@ public final class Settings {
         public static final String IN_CALL_PROXIMITY_SENSOR = "in_call_proximity_sensor";
 
         /**
-         * Boolean value whether to link ringtone and notification volume
          *
+         * Volume music controls
+         * @hide
+         */
+        public static final String VOLUME_MUSIC_CONTROLS = "volume_music_controls";
+
+        /**
+         * Boolean value whether to link ringtone and notification volume
          * @hide
          */
         public static final String VOLUME_LINK_NOTIFICATION = "volume_link_notification";
@@ -3213,6 +3213,18 @@ public final class Settings {
          * @hide
          */
         public static final String ALLOW_LIGHTS = "allow_lights";
+
+        /**
+         * Force expanded notifications on all apps that support it.
+         * @hide
+         */
+        public static final String FORCE_EXPANDED_NOTIFICATIONS = "force_expanded_notifications";
+
+        /**
+         * Volume rocker wake
+         * @hide
+         */
+        public static final String VOLUME_WAKE_SCREEN = "volume_wake_screen";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
