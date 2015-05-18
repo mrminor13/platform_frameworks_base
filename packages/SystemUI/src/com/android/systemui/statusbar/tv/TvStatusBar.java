@@ -60,6 +60,7 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void disable(int state, boolean animate) {
+        propagateDisabledFlags(state);
     }
 
     @Override
@@ -76,6 +77,7 @@ public class TvStatusBar extends BaseStatusBar {
 
     @Override
     public void topAppWindowChanged(boolean visible) {
+        propagateMenuVisibility(visible);
     }
 
     @Override

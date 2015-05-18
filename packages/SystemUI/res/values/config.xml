@@ -302,5 +302,14 @@
     <!-- Default value how much apps show the app screenshot on recents view entry -->
     <integer name="expanded_items_default">2</integer>
 
+    <bool name="config_enablePerfBoostForShutterAnimation">false</bool>
+    <integer name="shutteranimationboost_timeout_param">0</integer>
+    <integer name="shutteranimationboost_schedboost_param">0</integer>
+    <integer name="shutteranimationboost_cpuboost_param">0</integer>
+
+    <!-- Sensivity of pie gestures controlls.
+        Must be minimum 1 and maximum 10 (See @EdgeServiceConstants.java).
+        Default for pie is high sensivity -->
+    <integer name="pie_gesture_sensivity">8</integer>
 </resources>
 
