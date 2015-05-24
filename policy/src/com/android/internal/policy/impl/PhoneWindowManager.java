@@ -566,6 +566,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private long mScreenshotChordPowerKeyTime;
 
     private boolean mVolumeWakeScreen;
+    private boolean mPowerKeyTriggered;
+    private long mPowerKeyTime;
     private boolean mVolumeMusicControls;
     private boolean mIsLongPress;
 
@@ -604,7 +606,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_POWER_DELAYED_PRESS = 13;
     private static final int MSG_POWER_LONG_PRESS = 14;
     private static final int MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK = 15;
-
     private boolean mClearedBecauseOfForceShow;
     private boolean mTopWindowIsKeyguard;
 
@@ -711,7 +712,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POLICY_CONTROL), false, this,
-		    UserHandle.USER_ALL);
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.NAVIGATION_BAR_HEIGHT), false, this,
                     UserHandle.USER_ALL);
@@ -4773,42 +4774,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
 
-                if ((result & ACTION_PASS_TO_USER) == 0) {
-                    boolean mayChangeVolume = false;
-
-                    if (isMusicActive()) {
-                        if (mVolumeMusicControls) {
-                            // Detect long key presses.
-                            if (down) {
-                                mIsLongPress = false;
-                                // Map MUTE key to MEDIA_PLAY_PAUSE
-                                int newKeyCode = KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE;
-                                switch (keyCode) {
-                                    case KeyEvent.KEYCODE_VOLUME_DOWN:
-                                        newKeyCode = KeyEvent.KEYCODE_MEDIA_PREVIOUS;
-                                        break;
-                                    case KeyEvent.KEYCODE_VOLUME_UP:
-                                        newKeyCode = KeyEvent.KEYCODE_MEDIA_NEXT;
-                                        break;
-                                }
-                                scheduleLongPressKeyEvent(event, newKeyCode);
-                                // Consume key down events of all presses.
+                if (isMusicActive() && (result & ACTION_PASS_TO_USER) == 0) {
+                    if (mVolumeMusicControls && down && (keyCode != KeyEvent.KEYCODE_VOLUME_MUTE)) {
+                        mIsLongPress = false;
+                        int newKeyCode = event.getKeyCode() == KeyEvent.KEYCODE_VOLUME_UP ?
+                                KeyEvent.KEYCODE_MEDIA_NEXT : KeyEvent.KEYCODE_MEDIA_PREVIOUS;
+                        Message msg = mHandler.obtainMessage(MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK,
+                                new KeyEvent(event.getDownTime(), event.getEventTime(),
+                                    event.getAction(), newKeyCode, 0));
+                        msg.setAsynchronous(true);
+                        mHandler.sendMessageDelayed(msg, ViewConfiguration.getLongPressTimeout());
+                        break;
+                    } else {
+                        if (mVolumeMusicControls && !down) {
+                            mHandler.removeMessages(MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK);
+                            if (mIsLongPress) {
                                 break;
-                            } else {
-                                mHandler.removeMessages(MSG_DISPATCH_VOLKEY_WITH_WAKE_LOCK);
-                                // Consume key up events of long presses only.
-                                if (mIsLongPress) {
-                                    break;
-                                }
-                                // Change volume only on key up events of short presses.
-                                mayChangeVolume = true;
                             }
-                        } else {
-                            // Long key press detection not applicable, change volume only
-                            // on key down events
-                            mayChangeVolume = down;
                         }
-                        if (!isScreenOn()) {
+                        if (!isScreenOn() && !mVolumeWakeScreen) {
                             // If we aren't passing to the user and no one else
                             // handled it send it to the session manager to figure
                             // out.
@@ -4817,20 +4801,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     KeyEvent.ACTION_DOWN), true);
                         }
                     }
-
-                    if (mayChangeVolume) {
-                        // If we aren't passing to the user and no one else
-                        // handled it send it to the session manager to figure
-                        // out.
-
-                        // Rewrite the event to use key-down as sendVolumeKeyEvent will
-                        // only change the volume on key down.
-                        KeyEvent newEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
-                        MediaSessionLegacyHelper.getHelper(mContext)
-                                .sendVolumeKeyEvent(newEvent, true);
-                    }
-                    break;
                 }
+
                 break;
             }
 
