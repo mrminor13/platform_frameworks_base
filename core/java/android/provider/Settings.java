@@ -2637,12 +2637,6 @@ public final class Settings {
         public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
 
         /**
-         * Whether the volume slider adjust sound is enabled. The value is
-         * boolean (1 or 0).
-         */
-        public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
-
-        /**
          * Whether the notification LED should repeatedly flash when a notification is
          * pending. The value is boolean (1 or 0).
          * @hide
@@ -3632,7 +3626,7 @@ public final class Settings {
             NOTIFICATION_SOUND,
             STATUS_BAR_BATTERY_STYLE,
             STATUS_BAR_SHOW_BATTERY_PERCENT,
-            ALLOW_LIGHTS
+            ALLOW_LIGHTS,
             DISPLAY_TEMPERATURE_NIGHT,
             DISPLAY_TEMPERATURE_DAY,
             DISPLAY_TEMPERATURE_MODE,
