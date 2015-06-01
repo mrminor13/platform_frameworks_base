@@ -3702,6 +3702,12 @@ public final class Settings {
 
         /**
          * Boolean value whether to link ringtone and notification volume
+         * Enable double tap gesture anywhere on the lock screen put device to sleep
+         * @hide
+         */
+        public static final String DOUBLE_TAP_SLEEP_ANYWHERE = "double_tap_sleep_anywhere";
+
+        /**
          * Navigation bar button color
          * @hide
          */
