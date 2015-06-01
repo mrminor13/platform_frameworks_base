@@ -727,6 +727,17 @@ public class NavigationBarView extends LinearLayout {
         View leftMenuKeyView = getLeftMenuButton();
         View rightMenuKeyView = getRightMenuButton();
 
+        if (mOverrideMenuKeys) {
+            leftMenuKeyView.setVisibility(View.VISIBLE);
+            rightMenuKeyView.setVisibility(View.VISIBLE);
+            return;
+        } else if (mMenuVisibility == MENU_VISIBILITY_NEVER) {
+            leftMenuKeyView.setVisibility(View.INVISIBLE);
+            rightMenuKeyView.setVisibility(
+                    mIsImeButtonVisible ? View.GONE : View.INVISIBLE);
+        }
+
+
         // Only show Menu if IME switcher not shown.
         final boolean shouldShow =
                 ((mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) == 0);
