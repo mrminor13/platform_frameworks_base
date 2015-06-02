@@ -2631,6 +2631,18 @@ public final class Settings {
         public static final String VOLUME_ADJUST_SOUND_ENABLED = "volume_adjust_sound_enabled";
 
         /**
+         * Whether the volume slider adjust sound is enabled. The value is
+         * boolean (1 or 0).
+         */
+        public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
+
+        /**
+         * Whether the volume slider adjust sound is enabled. The value is
+         * boolean (1 or 0).
+         */
+        public static final String VOLUME_ADJUST_SOUND = "volume_adjust_sound";
+
+        /**
          * Whether the notification LED should repeatedly flash when a notification is
          * pending. The value is boolean (1 or 0).
          * @hide
@@ -3611,6 +3623,7 @@ public final class Settings {
             TTY_MODE,
             SOUND_EFFECTS_ENABLED,
             HAPTIC_FEEDBACK_ENABLED,
+            VOLUME_ADJUST_SOUND,
             POWER_SOUNDS_ENABLED,       // moved to global
             DOCK_SOUNDS_ENABLED,        // moved to global
             LOCKSCREEN_SOUNDS_ENABLED,
@@ -3636,6 +3649,7 @@ public final class Settings {
         public static final String[] CLONE_TO_MANAGED_PROFILE = {
             DATE_FORMAT,
             HAPTIC_FEEDBACK_ENABLED,
+            VOLUME_ADJUST_SOUND,
             SOUND_EFFECTS_ENABLED,
             TEXT_SHOW_PASSWORD,
             TIME_12_24
