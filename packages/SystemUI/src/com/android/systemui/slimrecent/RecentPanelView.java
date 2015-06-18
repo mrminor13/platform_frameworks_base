@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 SlimRoms Project
+ * Copyright (C) 2014-2015 SlimRoms Project
  * Author: Lars Greiss - email: kufikugel@googlemail.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -68,9 +68,6 @@ public class RecentPanelView {
     private static final String TAG = "RecentPanelView";
     private static final boolean DEBUG = false;
 
-    private static final int DISPLAY_TASKS = 20;
-    public static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
-
     public static final String TASK_PACKAGE_IDENTIFIER = "#ident:";
 
     private static final int EXPANDED_STATE_UNKNOWN  = 0;
@@ -120,6 +117,7 @@ public class RecentPanelView {
     private float mScaleFactor;
     private int mExpandedMode = EXPANDED_MODE_AUTO;
     private boolean mShowTopTask;
+    private boolean mOnlyShowRunningTasks;
 
     private PopupMenu mPopup;
 
@@ -554,7 +552,8 @@ public class RecentPanelView {
      */
     private TaskDescription createTaskDescription(int taskId, int persistentTaskId,
             Intent baseIntent, ComponentName origActivity,
-            CharSequence description, boolean isFavorite, int expandedState) {
+            CharSequence description, boolean isFavorite, int expandedState,
+            ActivityManager.TaskDescription td) {
 
         final Intent intent = new Intent(baseIntent);
         if (origActivity != null) {
@@ -566,7 +565,10 @@ public class RecentPanelView {
         final ResolveInfo resolveInfo = pm.resolveActivity(intent, 0);
         if (resolveInfo != null) {
             final ActivityInfo info = resolveInfo.activityInfo;
-            final String title = info.loadLabel(pm).toString();
+            String title = td.getLabel();
+            if (title == null) {
+                title = info.loadLabel(pm).toString();
+            }
 
             String identifier = TASK_PACKAGE_IDENTIFIER;
             final ComponentName component = intent.getComponent();
@@ -579,10 +581,11 @@ public class RecentPanelView {
             if (title != null && title.length() > 0) {
                 if (DEBUG) Log.v(TAG, "creating activity desc for id="
                         + persistentTaskId + ", label=" + title);
+                int color = td.getPrimaryColor();
 
                 final TaskDescription item = new TaskDescription(taskId,
                         persistentTaskId, resolveInfo, baseIntent, info.packageName,
-                        identifier, description, isFavorite, expandedState);
+                        identifier, description, isFavorite, expandedState, color);
                 item.setLabel(title);
                 return item;
             } else {
@@ -620,11 +623,18 @@ public class RecentPanelView {
         final ActivityManager am = (ActivityManager)
         mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
+        int maxNumTasksToLoad = Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.RECENTS_MAX_APPS, ActivityManager.getMaxRecentTasksStatic(),
+                UserHandle.USER_CURRENT);
+
         final List<ActivityManager.RecentTaskInfo> recentTasks =
-                am.getRecentTasksForUser(MAX_TASKS, ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS
+                am.getRecentTasksForUser(maxNumTasksToLoad,
+                ActivityManager.RECENT_IGNORE_HOME_STACK_TASKS
                         | ActivityManager.RECENT_IGNORE_UNAVAILABLE
-                        | ActivityManager.RECENT_INCLUDE_PROFILES
-                        | ActivityManager.RECENT_WITH_EXCLUDED, UserHandle.CURRENT.getIdentifier());
+                        | ActivityManager.RECENT_INCLUDE_PROFILES,
+                        UserHandle.CURRENT.getIdentifier());
+        final List<ActivityManager.RunningTaskInfo> runningTasks =
+                am.getRunningTasks(Integer.MAX_VALUE);
         final int numTasks = recentTasks.size();
         ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN)
                 .addCategory(Intent.CATEGORY_HOME).resolveActivityInfo(pm, 0);
@@ -633,13 +643,25 @@ public class RecentPanelView {
         final int firstExpandedItems =
                 mContext.getResources().getInteger(R.integer.expanded_items_default);
         // Get current task list. We do not need to do it in background. We only load MAX_TASKS.
-        for (int i = 0, index = 0; i < numTasks && (index < MAX_TASKS); ++i) {
+        for (int i = 0, index = 0; i < numTasks && (index < numTasks); ++i) {
             if (mCancelledByUser) {
                 if (DEBUG) Log.v(TAG, "loading tasks cancelled");
                 mIsLoading = false;
                 return;
             }
+            boolean topTask = i == 0;
             final ActivityManager.RecentTaskInfo recentInfo = recentTasks.get(i);
+            if (i == 0 && isCurrentHomeActivity(runningTasks.get(0))) {
+                topTask = false;
+            }
+            boolean isRunning = false;
+            for (ActivityManager.RunningTaskInfo task : runningTasks) {
+                if (recentInfo.baseIntent.getComponent().getPackageName().equals(
+                        task.baseActivity.getPackageName())) {
+                    isRunning = true;
+                }
+            }
+            if (mOnlyShowRunningTasks && !isRunning) continue;
 
             final Intent intent = new Intent(recentInfo.baseIntent);
             if (recentInfo.origActivity != null) {
@@ -654,7 +676,7 @@ public class RecentPanelView {
             TaskDescription item = createTaskDescription(recentInfo.id,
                     recentInfo.persistentId, recentInfo.baseIntent,
                     recentInfo.origActivity, recentInfo.description,
-                    false, EXPANDED_STATE_UNKNOWN);
+                    false, EXPANDED_STATE_UNKNOWN, recentInfo.taskDescription);
 
             if (item != null) {
                 for (String fav : favList) {
@@ -664,7 +686,7 @@ public class RecentPanelView {
                     }
                 }
 
-                if (i == 0 ) {
+                if (topTask) {
                     if (mShowTopTask) {
                         // User want to see actual running task. Set it here
                         int oldState = getExpandedState(item);
@@ -728,6 +750,15 @@ public class RecentPanelView {
         // Let us load the cards for it in background.
         final CardLoader cardLoader = new CardLoader();
         cardLoader.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+    }
+
+    private boolean isCurrentHomeActivity(ActivityManager.RunningTaskInfo task) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        ResolveInfo resolveInfo =
+            mContext.getPackageManager().resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        String currentHomePackage = resolveInfo.activityInfo.packageName;
+        return task.baseActivity.getPackageName().equals(currentHomePackage);
     }
 
     /**
@@ -841,6 +872,10 @@ public class RecentPanelView {
 
     protected void setShowTopTask(boolean enabled) {
         mShowTopTask = enabled;
+    }
+
+    protected void setShowOnlyRunningTasks(boolean enabled) {
+        mOnlyShowRunningTasks = enabled;
     }
 
     protected boolean hasFavorite() {
