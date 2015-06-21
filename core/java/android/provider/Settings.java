@@ -3409,6 +3409,13 @@ public final class Settings {
         public static final String NAVIGATION_BAR_CONFIG = "navigation_bar_config";
 
         /**
+         * Config for advanced power menu
+         *
+         * @hide
+         */
+        public static final String POWER_MENU_CONFIG = "power_menu_config";
+
+        /**
          * Wether the navbar menu button is on the left/right/both
          * @hide
          */
@@ -6310,12 +6317,6 @@ public final class Settings {
          * Whether ADB is enabled.
          */
         public static final String ADB_ENABLED = "adb_enabled";
-
-        /**
-         * String to contain power menu actions
-         * @hide
-         */
-        public static final String POWER_MENU_ACTIONS = "power_menu_actions";
 
         /**
          * Whether Views are allowed to save their attribute data.

@@ -177,4 +177,7 @@
 
     <!--EXPOSED ICON TINT FOR POWER DIALOG 05.06.2015-->
     <color name="exposed_powerdialog_icon_tint">#212121</color>
+
+    <!-- Slim's drag sort list view -->
+    <color name="dslv_icon_dark">#ff009688</color>
 </resources>
