@@ -21,6 +21,8 @@ import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 
+import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -63,14 +65,20 @@ class AutomaticBrightnessController {
     // when adapting to brighter or darker environments.  This parameter controls how quickly
     // brightness changes occur in response to an observed change in light level that exceeds the
     // hysteresis threshold.
-    private static final long BRIGHTENING_LIGHT_DEBOUNCE = 4000;
-    private static final long DARKENING_LIGHT_DEBOUNCE = 8000;
+    private static final long BRIGHTENING_LIGHT_FAST_DEBOUNCE = 500;
+    private static final long BRIGHTENING_LIGHT_DEBOUNCE = 3000;
+    private static final long DARKENING_LIGHT_DEBOUNCE = 4000;
 
     // Hysteresis constraints for brightening or darkening.
     // The recent lux must have changed by at least this fraction relative to the
     // current ambient lux before a change will be considered.
     private static final float BRIGHTENING_LIGHT_HYSTERESIS = 0.10f;
     private static final float DARKENING_LIGHT_HYSTERESIS = 0.20f;
+
+    // Threshold (in lux) to select between normal and fast debounce time.
+    // If the difference between last sample and weighted value is larger than this value,
+    // fast debounce is used.
+    private static final float BRIGHTENING_FAST_THRESHOLD = 1000f;
 
     // The intercept used for the weighting calculation. This is used in order to keep all possible
     // weighting values positive.
@@ -174,9 +182,16 @@ class AutomaticBrightnessController {
     // Are we going to adjust brightness while dozing.
     private boolean mDozing;
 
-    public AutomaticBrightnessController(Callbacks callbacks, Looper looper,
+    // Night mode color temperature adjustments
+    private final LiveDisplayController mLiveDisplay;
+
+    private final Context mContext;
+
+    public AutomaticBrightnessController(Context context, Callbacks callbacks, Looper looper,
             SensorManager sensorManager, Spline autoBrightnessSpline, int lightSensorWarmUpTime,
-            int brightnessMin, int brightnessMax, float dozeScaleFactor) {
+            int brightnessMin, int brightnessMax, float dozeScaleFactor,
+            LiveDisplayController ldc) {
+        mContext = context;
         mCallbacks = callbacks;
         mTwilight = LocalServices.getService(TwilightManager.class);
         mSensorManager = sensorManager;
@@ -185,6 +200,7 @@ class AutomaticBrightnessController {
         mScreenBrightnessRangeMaximum = brightnessMax;
         mLightSensorWarmUpTimeConfig = lightSensorWarmUpTime;
         mDozeScaleFactor = dozeScaleFactor;
+        mLiveDisplay = ldc;
 
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer = new AmbientLightRingBuffer();
@@ -251,6 +267,7 @@ class AutomaticBrightnessController {
             if (!mLightSensorEnabled) {
                 mLightSensorEnabled = true;
                 mLightSensorEnableTime = SystemClock.uptimeMillis();
+
                 mSensorManager.registerListener(mLightSensorListener, mLightSensor,
                         LIGHT_SENSOR_RATE_MILLIS * 1000, mHandler);
                 return true;
@@ -271,6 +288,7 @@ class AutomaticBrightnessController {
     private void handleLightSensorEvent(long time, float lux) {
         mHandler.removeMessages(MSG_UPDATE_AMBIENT_LUX);
 
+        if (DEBUG) Slog.d(TAG, "handleLightSensorEvent: time=" + time + ", lux=" + lux);
         applyLightSensorMeasurement(time, lux);
         updateAmbientLux(time);
     }
@@ -338,7 +356,7 @@ class AutomaticBrightnessController {
         return x * (x * 0.5f + WEIGHTING_INTERCEPT);
     }
 
-    private long nextAmbientLightBrighteningTransition(long time) {
+    private long nextAmbientLightBrighteningTransition(long time, float ambientLux) {
         final int N = mAmbientLightRingBuffer.size();
         long earliestValidTime = time;
         for (int i = N - 1; i >= 0; i--) {
@@ -347,10 +365,13 @@ class AutomaticBrightnessController {
             }
             earliestValidTime = mAmbientLightRingBuffer.getTime(i);
         }
-        return earliestValidTime + BRIGHTENING_LIGHT_DEBOUNCE;
+
+        long debounceDelay = mLastObservedLux - ambientLux > BRIGHTENING_FAST_THRESHOLD
+                ? BRIGHTENING_LIGHT_FAST_DEBOUNCE : BRIGHTENING_LIGHT_DEBOUNCE;
+        return earliestValidTime + debounceDelay;
     }
 
-    private long nextAmbientLightDarkeningTransition(long time) {
+    private long nextAmbientLightDarkeningTransition(long time, float ambientLux) {
         final int N = mAmbientLightRingBuffer.size();
         long earliestValidTime = time;
         for (int i = N - 1; i >= 0; i--) {
@@ -359,6 +380,7 @@ class AutomaticBrightnessController {
             }
             earliestValidTime = mAmbientLightRingBuffer.getTime(i);
         }
+
         return earliestValidTime + DARKENING_LIGHT_DEBOUNCE;
     }
 
@@ -394,13 +416,12 @@ class AutomaticBrightnessController {
             updateAutoBrightness(true);
         }
 
-        long nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
-        long nextDarkenTransition = nextAmbientLightDarkeningTransition(time);
         float ambientLux = calculateAmbientLux(time);
+        long nextBrightenTransition = nextAmbientLightBrighteningTransition(time, ambientLux);
+        long nextDarkenTransition = nextAmbientLightDarkeningTransition(time, ambientLux);
 
         if (ambientLux >= mBrighteningLuxThreshold && nextBrightenTransition <= time
                 || ambientLux <= mDarkeningLuxThreshold && nextDarkenTransition <= time) {
-            setAmbientLux(ambientLux);
             if (DEBUG) {
                 Slog.d(TAG, "updateAmbientLux: "
                         + ((ambientLux > mAmbientLux) ? "Brightened" : "Darkened") + ": "
@@ -408,9 +429,10 @@ class AutomaticBrightnessController {
                         + ", mAmbientLightRingBuffer=" + mAmbientLightRingBuffer
                         + ", mAmbientLux=" + mAmbientLux);
             }
+            setAmbientLux(ambientLux);
             updateAutoBrightness(true);
-            nextBrightenTransition = nextAmbientLightBrighteningTransition(time);
-            nextDarkenTransition = nextAmbientLightDarkeningTransition(time);
+            nextBrightenTransition = nextAmbientLightBrighteningTransition(time, ambientLux);
+            nextDarkenTransition = nextAmbientLightDarkeningTransition(time, ambientLux);
         }
         long nextTransitionTime = Math.min(nextDarkenTransition, nextBrightenTransition);
         // If one of the transitions is ready to occur, but the total weighted ambient lux doesn't
@@ -445,6 +467,9 @@ class AutomaticBrightnessController {
                 Slog.d(TAG, "updateAutoBrightness: adjGamma=" + adjGamma);
             }
         }
+
+        // Update LiveDisplay with the current lux
+        mLiveDisplay.updateLiveDisplay(mAmbientLux);
 
         if (USE_TWILIGHT_ADJUSTMENT) {
             TwilightState state = mTwilight.getCurrentState();

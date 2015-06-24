@@ -10067,9 +10067,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             } finally {
                 // Ensure that whatever happens, we clean up the identity state
                 sCallerIdentity.remove();
-                // Ensure we're done with the provider.
-                removeContentProviderExternalUnchecked(name, null, userId);
             }
+
+            // We've got the fd now, so we're done with the provider.
+            removeContentProviderExternalUnchecked(name, null, userId);
         } else {
             Slog.d(TAG, "Failed to get provider for authority '" + name + "'");
         }
@@ -15608,6 +15609,30 @@ public final class ActivityManagerService extends ActivityManagerNative
     // BROADCASTS
     // =========================================================
 
+    private final List getStickiesLocked(String action, IntentFilter filter,
+            List cur, int userId) {
+        final ContentResolver resolver = mContext.getContentResolver();
+        ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
+        if (stickies == null) {
+            return cur;
+        }
+        final ArrayList<Intent> list = stickies.get(action);
+        if (list == null) {
+            return cur;
+        }
+        int N = list.size();
+        for (int i=0; i<N; i++) {
+            Intent intent = list.get(i);
+            if (filter.match(resolver, intent, true, TAG) >= 0) {
+                if (cur == null) {
+                    cur = new ArrayList<Intent>();
+                }
+                cur.add(intent);
+            }
+        }
+        return cur;
+    }
+
     boolean isPendingBroadcastProcessLocked(int pid) {
         return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
                 || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid);
@@ -15632,11 +15657,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission, int userId) {
         enforceNotIsolatedCaller("registerReceiver");
-        ArrayList<Intent> stickyIntents = null;
-        ProcessRecord callerApp = null;
         int callingUid;
         int callingPid;
         synchronized(this) {
+            ProcessRecord callerApp = null;
             if (caller != null) {
                 callerApp = getRecordForAppLocked(caller);
                 if (callerApp == null) {
@@ -15659,66 +15683,39 @@ public final class ActivityManagerService extends ActivityManagerNative
                 callingPid = Binder.getCallingPid();
             }
 
-            userId = handleIncomingUser(callingPid, callingUid, userId,
+            userId = this.handleIncomingUser(callingPid, callingUid, userId,
                     true, ALLOW_FULL_ONLY, "registerReceiver", callerPackage);
 
-            Iterator<String> actions = filter.actionsIterator();
-            if (actions == null) {
-                ArrayList<String> noAction = new ArrayList<String>(1);
-                noAction.add(null);
-                actions = noAction.iterator();
-            }
+            List allSticky = null;
 
-            // Collect stickies of users
-            int[] userIds = { UserHandle.USER_ALL, UserHandle.getUserId(callingUid) };
-            while (actions.hasNext()) {
-                String action = actions.next();
-                for (int id : userIds) {
-                    ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(id);
-                    if (stickies != null) {
-                        ArrayList<Intent> intents = stickies.get(action);
-                        if (intents != null) {
-                            if (stickyIntents == null) {
-                                stickyIntents = new ArrayList<Intent>();
-                            }
-                            stickyIntents.addAll(intents);
-                        }
-                    }
-                }
-            }
-        }
-
-        ArrayList<Intent> allSticky = null;
-        if (stickyIntents != null) {
-            final ContentResolver resolver = mContext.getContentResolver();
             // Look for any matching sticky broadcasts...
-            for (int i = 0, N = stickyIntents.size(); i < N; i++) {
-                Intent intent = stickyIntents.get(i);
-                // If intent has scheme "content", it will need to acccess
-                // provider that needs to lock mProviderMap in ActivityThread
-                // and also it may need to wait application response, so we
-                // cannot lock ActivityManagerService here.
-                if (filter.match(resolver, intent, true, TAG) >= 0) {
-                    if (allSticky == null) {
-                        allSticky = new ArrayList<Intent>();
-                    }
-                    allSticky.add(intent);
+            Iterator actions = filter.actionsIterator();
+            if (actions != null) {
+                while (actions.hasNext()) {
+                    String action = (String)actions.next();
+                    allSticky = getStickiesLocked(action, filter, allSticky,
+                            UserHandle.USER_ALL);
+                    allSticky = getStickiesLocked(action, filter, allSticky,
+                            UserHandle.getUserId(callingUid));
                 }
+            } else {
+                allSticky = getStickiesLocked(null, filter, allSticky,
+                        UserHandle.USER_ALL);
+                allSticky = getStickiesLocked(null, filter, allSticky,
+                        UserHandle.getUserId(callingUid));
             }
-        }
 
-        // The first sticky in the list is returned directly back to the client.
-        Intent sticky = allSticky != null ? allSticky.get(0) : null;
-        if (DEBUG_BROADCAST) Slog.v(TAG, "Register receiver " + filter + ": " + sticky);
-        if (receiver == null) {
-            return sticky;
-        }
+            // The first sticky in the list is returned directly back to
+            // the client.
+            Intent sticky = allSticky != null ? (Intent)allSticky.get(0) : null;
 
-        synchronized (this) {
-            if (callerApp != null && callerApp.pid == 0) {
-                // Caller already died
-                return null;
+            if (DEBUG_BROADCAST) Slog.v(TAG, "Register receiver " + filter
+                    + ": " + sticky);
+
+            if (receiver == null) {
+                return sticky;
             }
+
             ReceiverList rl
                 = (ReceiverList)mRegisteredReceivers.get(receiver.asBinder());
             if (rl == null) {
@@ -18411,19 +18408,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mNumCachedHiddenProcs++;
                         numCached++;
                         if (numCached > cachedProcessLimit) {
-                            app.kill("cached #" + numCached, true);
+                            postKillProc(app, "cached #" + numCached, true);
                         }
                         break;
                     case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
                         if (numEmpty > ProcessList.TRIM_EMPTY_APPS
                                 && app.lastActivityTime < oldTime) {
-                            app.kill("empty for "
+                            postKillProc(app, "empty for "
                                     + ((oldTime + ProcessList.MAX_EMPTY_TIME - app.lastActivityTime)
                                     / 1000) + "s", true);
                         } else {
                             numEmpty++;
                             if (numEmpty > emptyProcessLimit) {
-                                app.kill("empty #" + numEmpty, true);
+                                postKillProc(app, "empty #" + numEmpty, true);
                             }
                         }
                         break;
@@ -18439,7 +18436,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     // definition not re-use the same process again, and it is
                     // good to avoid having whatever code was running in them
                     // left sitting around after no longer needed.
-                    app.kill("isolated not needed", true);
+                    postKillProc(app, "isolated not needed", true);
                 }
 
                 if (app.curProcState >= ActivityManager.PROCESS_STATE_HOME
@@ -18662,6 +18659,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Slog.d(TAG, "Did OOM ADJ in " + (SystemClock.uptimeMillis()-now) + "ms");
             }
         }
+    }
+
+    private void postKillProc(final ProcessRecord app, final String reason, final boolean noisy) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                app.kill(reason, noisy);
+            }
+        });
     }
 
     final void trimApplications() {

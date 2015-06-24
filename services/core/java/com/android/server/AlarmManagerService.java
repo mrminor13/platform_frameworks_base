@@ -369,10 +369,10 @@ class AlarmManagerService extends SystemService {
         public int compare(Batch b1, Batch b2) {
             long when1 = b1.start;
             long when2 = b2.start;
-            if (when1 - when2 > 0) {
+            if (when1 > when2) {
                 return 1;
             }
-            if (when1 - when2 < 0) {
+            if (when1 < when2) {
                 return -1;
             }
             return 0;
@@ -1480,8 +1480,8 @@ class AlarmManagerService extends SystemService {
      */
     public static class IncreasingTimeOrder implements Comparator<Alarm> {
         public int compare(Alarm a1, Alarm a2) {
-            long when1 = a1.when;
-            long when2 = a2.when;
+            long when1 = a1.whenElapsed;
+            long when2 = a2.whenElapsed;
             if (when1 - when2 > 0) {
                 return 1;
             }
@@ -1606,7 +1606,7 @@ class AlarmManagerService extends SystemService {
         if (mLastAlarmDeliveryTime <= 0) {
             return false;
         }
-        if (mPendingNonWakeupAlarms.size() > 0 && mNextNonWakeupDeliveryTime > nowELAPSED) {
+        if (mPendingNonWakeupAlarms.size() > 0 && mNextNonWakeupDeliveryTime < nowELAPSED) {
             // This is just a little paranoia, if somehow we have pending non-wakeup alarms
             // and the next delivery time is in the past, then just deliver them all.  This
             // avoids bugs where we get stuck in a loop trying to poll for alarms.
