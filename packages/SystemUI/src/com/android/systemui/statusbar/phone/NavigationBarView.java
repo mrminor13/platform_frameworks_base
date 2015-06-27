@@ -530,6 +530,7 @@ public class NavigationBarView extends LinearLayout {
         }
 
         Drawable d = ActionHelper.getActionIconImage(mContext, clickAction, iconUri);
+
         if (d != null) {
             if (colorize && mNavBarButtonColorMode != 3) {
                 v.setImageBitmap(ColorHelper.getColoredBitmap(d, mNavBarButtonColor));
@@ -676,6 +677,9 @@ public class NavigationBarView extends LinearLayout {
         getLeftImeArrowButton().setVisibility(mIsImeArrowVisible ? View.VISIBLE : View.GONE);
         getRightImeArrowButton().setVisibility(mIsImeArrowVisible ? View.VISIBLE : View.GONE);
 
+        // Update menu button in case the IME state has changed.
+        setMenuVisibility(mShowMenu, true);
+
         setDisabledFlags(mDisabledFlags, true);
     }
 
@@ -736,16 +740,6 @@ public class NavigationBarView extends LinearLayout {
                     }
                 }
             }
-        }
-
-        if (disableHome) {
-            getLeftMenuButton().setVisibility(View.INVISIBLE);
-            getRightMenuButton().setVisibility(View.INVISIBLE);
-            getImeSwitchButton().setVisibility(View.GONE);
-            getLeftImeArrowButton().setVisibility(View.GONE);
-            getRightImeArrowButton().setVisibility(View.GONE);
-        } else {
-            setMenuVisibility(mShowMenu, true);
         }
 
         mBarTransitions.applyBackButtonQuiescentAlpha(mBarTransitions.getMode(), true /*animate*/);
@@ -859,6 +853,7 @@ public class NavigationBarView extends LinearLayout {
         // force the low profile & disabled states into compliance
         mBarTransitions.init(mVertical);
         setDisabledFlags(mDisabledFlags, true /* force */);
+        setMenuVisibility(mShowMenu, true /* force */);
 
         if (DEBUG) {
             Log.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
