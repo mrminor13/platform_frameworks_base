@@ -56,6 +56,7 @@ import com.android.systemui.qs.tiles.ScreenOffTile;
 import com.android.systemui.qs.tiles.UsbTetherTile;
 import com.android.systemui.qs.tiles.ScreenshotTile;
 import com.android.systemui.qs.tiles.LedTile;
+import com.android.systemui.qs.tiles.RebootTile;
 import com.android.systemui.qs.tiles.ScreenTimeoutTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.settings.CurrentUserTracker;
@@ -317,7 +318,9 @@ public class QSTileHost implements QSTile.Host {
                 return new LiveDisplayTile(this);
             case QSConstants.TILE_LED:
                 return new LedTile(this);
-            default:
+            case QSConstants.TILE_REBOOT:
+                return new RebootTile(this);
+                default:
                 throw new IllegalArgumentException("Bad tile spec: " + tileSpec);
         }
     }
