@@ -120,9 +120,6 @@
     <!-- Weather -->
     <uses-permission android:name="com.cyanogenmod.lockclock.permission.READ_WEATHER" />
 
-    <!-- Weather -->
-    <uses-permission android:name="com.cyanogenmod.lockclock.permission.READ_WEATHER" />
-
     <!-- Sync tile -->
     <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
@@ -132,6 +129,9 @@
 
     <!-- Heads up -->
     <uses-permission android:name="android.permission.CHANGE_HEADS_UP_STATE" />
+    
+    <!-- LiveDisplay -->
+    <uses-permission android:name="android.permission.HARDWARE_ABSTRACTION_ACCESS" />
 
     <application
         android:name=".SystemUIApplication"
