@@ -465,7 +465,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.MENU_VISIBILITY),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-
+                    Settings.System.HEADS_UP_NOTIFCATION_DECAY),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.HEADS_UP_SNOOZE_TIME),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.HEADS_UP_GLOBAL_SWITCH),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.USE_SLIM_RECENTS), false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -528,6 +536,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         R.integer.heads_up_notification_decay),
                         UserHandle.USER_CURRENT);
                 resetHeadsUpDecayTimer();
+            } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.HEADS_UP_GLOBAL_SWITCH))) {
+                final boolean headsUpGlobalSwitch = Settings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.System.HEADS_UP_GLOBAL_SWITCH,
+                        1,
+                        UserHandle.USER_CURRENT) == 1;
+                setHeadsUpEnabled(headsUpGlobalSwitch);
             }
             update();
 
