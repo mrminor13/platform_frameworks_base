@@ -205,7 +205,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected boolean mDisableNotificationAlerts = false;
 
     private int mHeadsUpSnoozeTime;
-    private boolean mHeadsUpGlobalSwitch;
+    private int mHeadsUpGlobalSwitch;
     private long mHeadsUpSnoozeStartTime;
     protected String mHeadsUpPackageName;
 
@@ -2243,11 +2243,15 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mHeadsUpSnoozeTime / 60 / 1000), Toast.LENGTH_LONG).show();
     }
 
-    protected boolean isHeadsUpEnabled() {
-        return mHeadsUpGlobalSwitch;
+    protected boolean isHeadsUpDisabled() {
+        return mHeadsUpGlobalSwitch == 0;
     }
 
-    protected void setHeadsUpEnabled(boolean headsUpGlobalSwitch) {
+    protected boolean isHeadsUpForced() {
+        return mHeadsUpGlobalSwitch == 2;
+    }
+
+    protected void setHeadsUpGlobalSwitch(int headsUpGlobalSwitch) {
         mHeadsUpGlobalSwitch = headsUpGlobalSwitch;
     }
 
@@ -2281,21 +2285,23 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        // Stop here if headsup is globally disabled
-        if (!isHeadsUpEnabled()) {
+        String pkg = sbn.getPackageName();
+
+        // Stop here if :
+        //      headsup is globally disabled or we are globally snoozing
+        //  and
+        //      notification is not a call (intrusive/non-intrusive is handled elsewhere)
+        if ((isHeadsUpDisabled() || isHeadsUpInSnooze()) && !isIncomingCall(pkg)) {
             return false;
         }
 
-        String pkg = sbn.getPackageName();
-        if (mHeadsUpNotificationView.isSnoozed(pkg)) {
+        // Stop here if headsup is not globally forced and app is snoozed
+        if (!isHeadsUpForced() &&
+                mHeadsUpNotificationView.isSnoozed(pkg)) {
             return false;
         }
 
         Notification notification = sbn.getNotification();
-        // we are snoozing
-        if (isHeadsUpInSnooze()) {
-            return false;
-        }
         // some predicates to make the boolean logic legible
         boolean isNoisy = (notification.defaults & Notification.DEFAULT_SOUND) != 0
                 || (notification.defaults & Notification.DEFAULT_VIBRATE) != 0
@@ -2304,14 +2310,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         boolean isHighPriority = sbn.getScore() >= INTERRUPTION_THRESHOLD;
         boolean isFullscreen = notification.fullScreenIntent != null;
 
-        final InputMethodManager inputMethodManager = (InputMethodManager)
-                mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        boolean isIMEShowing = inputMethodManager.isImeShowing();
-
         // incoming call should be allowed to process
         // to handle non-intrusive ui correctly
-        int defHeadsUp = isIncomingCall(pkg)
+        int defHeadsUp = (isIncomingCall(pkg) && isNonIntrusiveEnabled())
                 ? Notification.HEADS_UP_ALLOWED
                 : Notification.HEADS_UP_NEVER;
         int asHeadsUp = notification.extras.getInt(Notification.EXTRA_AS_HEADS_UP,
@@ -2335,7 +2336,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         if (DEBUG) Log.d(TAG, "interrupt: "+interrupt);
 
         if (!interrupt) {
-            boolean isHeadsUpPackage = (mNoMan.getHeadsUpNotificationsEnabledForPackage(
+            boolean isHeadsUpPackage = isHeadsUpForced() ||
+                    (mNoMan.getHeadsUpNotificationsEnabledForPackage(
                     pkg, sbn.getUid()) != Notification.HEADS_UP_NEVER);
             if (DEBUG) Log.d(TAG, "package: "+pkg+", isHeadsUpPackage: "+isHeadsUpPackage);
 
@@ -2368,6 +2370,17 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     private boolean isIncomingCall(String packageName) {
         return packageName.equals("com.android.dialer");
+    }
+
+    private boolean isNonIntrusiveEnabled() {
+        final String result = Settings.System.getString(mContext.getContentResolver(),
+            Settings.System.USE_NON_INTRUSIVE_CALL);
+
+        // should be on by default
+        if (result == null)
+            return true;
+
+        return !result.equals("0");
     }
 
     public void setInteracting(int barWindow, boolean interacting) {

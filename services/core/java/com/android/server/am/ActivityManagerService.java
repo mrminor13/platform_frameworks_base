@@ -10411,6 +10411,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             mController = controller;
             Watchdog.getInstance().setActivityController(controller);
+
+            // linkToDeath to ensure ActivityManager.isUserAMonkey returns correct status.
+            if (controller != null) {
+
+                final IBinder.DeathRecipient death = new DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        setActivityController(null);
+                    }
+                };
+
+                try {
+                    controller.asBinder().linkToDeath(death, 0);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "given controller IBinder is already dead.");
+                }
+            }
         }
     }
 
@@ -10519,9 +10536,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return true;
                 }
             }
+            final int anrPid = proc.pid;
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    if (anrPid != proc.pid) {
+                        Slog.i(TAG, "Ignoring stale ANR (occurred in " + anrPid +
+                                    ", but current pid is " + proc.pid + ")");
+                        return;
+                    }
                     appNotResponding(proc, activity, parent, aboveSystem, annotation);
                 }
             });
