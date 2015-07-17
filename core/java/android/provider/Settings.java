@@ -3241,7 +3241,7 @@ public final class Settings {
          * @hide
          */
         public static final String DIM_NAV_BUTTONS_TOUCH_ANYWHERE = "dim_nav_buttons_touch_anywhere";
-        
+
         /**
          * Automatic keyboard rotation timeout.  0 to disable completely.
          * @hide
