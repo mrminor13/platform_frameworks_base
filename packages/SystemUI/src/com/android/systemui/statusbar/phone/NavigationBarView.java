@@ -25,6 +25,8 @@ import android.app.ActivityManagerNative;
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -37,6 +39,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -156,6 +159,8 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
     private boolean mDimNavButtonsAnimate;
     private int mDimNavButtonsAnimateDuration;
     private boolean mDimNavButtonsTouchAnywhere;
+    private PowerManager mPowerManager;
+    private boolean mIsPowerSaveMode = false;
 
     private ArrayList<ActionConfig> mButtonsConfig;
     private List<Integer> mButtonIdList;
@@ -247,19 +252,31 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
             mIsHandlerCallbackActive = false;
         }
 
+        // power saving mode is on, do nothing
+        if (mIsPowerSaveMode) return;
+
         final ViewGroup navButtons = getNavButtons();
         if (navButtons != null) {
             // restore alpha to previous state first
             if (mIsDim || mIsAnimating) {
                 mIsAnimating = false;
-                navButtons.clearAnimation();
-                mIsDim = false;
-                navButtons.setAlpha(mOriginalAlpha);
+                resetDim(navButtons);
             }
             if (mDimNavButtons) {
                 mHandler.postDelayed(mNavButtonDimmer, mDimNavButtonsTimeout);
                 mIsHandlerCallbackActive = true;
             }
+        }
+    }
+
+    private void resetDim(ViewGroup navButtons) {
+        if (navButtons == null) {
+            navButtons = getNavButtons();
+        }
+        if (navButtons != null) {
+            navButtons.clearAnimation();
+            mIsDim = false;
+            navButtons.setAlpha(mOriginalAlpha);
         }
     }
 
@@ -286,6 +303,26 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
         }
     }
 
+    // broadcast receiver for power saving mode
+    private final BroadcastReceiver mBatteryDimReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Log.d(TAG, "Broadcast received: " + intent.getAction());
+            }
+
+            mIsPowerSaveMode = mPowerManager.isPowerSaveMode();
+            if (mIsPowerSaveMode) {
+                // battery is low, no dim until charged
+                resetDim(null);
+            }
+            onNavButtonTouched();
+        }
+    };
+
+    private final IntentFilter mBatteryFilter = new IntentFilter(
+        PowerManager.ACTION_POWER_SAVE_MODE_CHANGING);
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -307,18 +344,23 @@ public class NavigationBarView extends LinearLayout implements BaseStatusBar.Nav
         mButtonIdList = new ArrayList<Integer>();
 
         mSettingsObserver = new SettingsObserver(new Handler());
+
+        mPowerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        mIsPowerSaveMode = mPowerManager.isPowerSaveMode();
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         mSettingsObserver.observe();
+        mContext.registerReceiver(mBatteryDimReceiver, mBatteryFilter);
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         mSettingsObserver.unobserve();
+        mContext.unregisterReceiver(mBatteryDimReceiver);
     }
 
     public BarTransitions getBarTransitions() {
