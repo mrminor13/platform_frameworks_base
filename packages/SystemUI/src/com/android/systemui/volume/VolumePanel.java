@@ -755,9 +755,8 @@ public class VolumePanel extends Handler implements DemoMode {
             sc.suppressorView =
                     (TextView) sc.group.findViewById(com.android.systemui.R.id.suppressor);
             sc.suppressorView.setVisibility(View.GONE);
-            final int plusOne = (streamType == AudioSystem.STREAM_BLUETOOTH_SCO ||
-                    streamType == AudioSystem.STREAM_VOICE_CALL) ? 1 : 0;
-            sc.seekbarView.setMax(getStreamMaxVolume(streamType) + plusOne);
+            sc.seekbarView.setMax(getStreamMaxVolume(streamType));
+            sc.seekbarView.setMax(getStreamMaxVolume(streamType));
             sc.seekbarView.setOnSeekBarChangeListener(mSeekListener);
             sc.seekbarView.setTag(sc);
             mStreamControls.put(streamType, sc);
@@ -1289,9 +1288,6 @@ public class VolumePanel extends Handler implements DemoMode {
                 if (controller != null) {
                     sc.controller.registerCallback(mMediaControllerCb);
                 }
-            }
-            if (sc.seekbarView.getMax() != max) {
-                sc.seekbarView.setMax(max);
             }
             updateStates();
         }
