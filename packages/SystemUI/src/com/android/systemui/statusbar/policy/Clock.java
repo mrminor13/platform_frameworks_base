@@ -327,8 +327,8 @@ public class Clock extends TextView implements DemoMode {
             if (dateString != null) {
                 int dateStringLen = dateString.length();
                 int timeStringOffset =
-                        (clockDatePosition == STYLE_DATE_LEFT) ?
-                        0 : timeResult.length() + 1;
+                        (clockDatePosition == STYLE_DATE_RIGHT) ?
+                        timeResult.length() + 1 : 0;
                 if (mClockDateDisplay == CLOCK_DATE_DISPLAY_GONE) {
                     formatted.delete(0, dateStringLen);
                 } else {
