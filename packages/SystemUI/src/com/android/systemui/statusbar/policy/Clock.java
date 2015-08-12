@@ -334,8 +334,7 @@ public class Clock extends TextView implements DemoMode {
                 } else {
                     if (mClockDateDisplay == CLOCK_DATE_DISPLAY_SMALL) {
                         CharacterStyle style = new RelativeSizeSpan(0.7f);
-                        formatted.setSpan(style, timeStringOffset,
-                                          timeStringOffset + dateStringLen,
+                        formatted.setSpan(style, 0, dateStringLen,
                                           Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
                     }
                 }
