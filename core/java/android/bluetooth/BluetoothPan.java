@@ -333,7 +333,8 @@ public final class BluetoothPan implements BluetoothProfile {
 
     public void setBluetoothTethering(boolean value) {
         if (DBG) log("setBluetoothTethering(" + value + ")");
-        if (mPanService != null) {
+
+        if (mPanService != null && isEnabled()) {
             try {
                 mPanService.setBluetoothTethering(value);
             } catch (RemoteException e) {
@@ -344,7 +345,8 @@ public final class BluetoothPan implements BluetoothProfile {
 
     public boolean isTetheringOn() {
         if (VDBG) log("isTetheringOn()");
-        if (mPanService != null) {
+
+        if (mPanService != null && isEnabled()) {
             try {
                 return mPanService.isTetheringOn();
             } catch (RemoteException e) {
