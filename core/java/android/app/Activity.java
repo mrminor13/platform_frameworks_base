@@ -1285,8 +1285,8 @@ public class Activity extends ContextThemeWrapper
 
         getApplication().dispatchActivityStarted(this);
     }
-    
-    private void setupFloatingActionBar(boolean reload) {     
+
+    private void setupFloatingActionBar(boolean reload) {
         if (mWindow == null) {
             return;
         }
@@ -1302,7 +1302,7 @@ public class Activity extends ContextThemeWrapper
         mWindow.getDecorView().setSystemUiVisibility(
             View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE);
-					
+
         FrameLayout decorFloatingView = (FrameLayout) mWindow.peekDecorView().getRootView();
         if (decorFloatingView == null) {
             return;
@@ -1312,14 +1312,14 @@ public class Activity extends ContextThemeWrapper
             mFloatingWindowView = new FloatingWindowView(this, getActionBarHeight(true));
             decorFloatingView.addView(mFloatingWindowView, -1, FloatingWindowView.getParams());
             decorFloatingView.setTagInternal(android.R.id.extractArea, mFloatingWindowView);
-			changeTitleBarColor();            
+			changeTitleBarColor();
         } else {
             mFloatingWindowView = (FloatingWindowView) decorFloatingView.getTag(android.R.id.extractArea);
-			changeTitleBarColor();            
+			changeTitleBarColor();
             decorFloatingView.bringChildToFront(mFloatingWindowView);
         }
     }
-    
+
     private void changeFloatingWindowColor(int bg_color, int ic_color) {
         mFloatingWindowView.setFloatingBackgroundColor(bg_color);
         mFloatingWindowView.setFloatingColorFilter(ic_color);
@@ -1332,7 +1332,7 @@ public class Activity extends ContextThemeWrapper
 				final PackageManager pm = getPackageManager();
 				// Getting current task packagename
 				final ActivityManager am = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
-                List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
+				List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);
 				ActivityManager.RunningTaskInfo task = tasks.get(0); // current task
 				ComponentName rootActivity = task.baseActivity;
 				String appPackageName = rootActivity.getPackageName();
@@ -1341,32 +1341,35 @@ public class Activity extends ContextThemeWrapper
 				final int[] attrs = new int[] {
 					res.getIdentifier("colorPrimary", "attr", appPackageName),
 					android.R.attr.colorPrimary
-				};                
+				};
 				final Resources.Theme theme = res.newTheme();
-				final ComponentName cn = pm.getLaunchIntentForPackage(appPackageName).getComponent();
-				if (cn != null) {
-				theme.applyStyle(pm.getActivityInfo(cn, 0).theme, false);
-				// Obtain the colorPrimary color from the attrs
-				TypedArray a = theme.obtainStyledAttributes(attrs);
-				// Do something with the color
-				final int colorPrimary = a.getColor(0, a.getColor(1, Color.WHITE));
-				// Make sure you recycle the TypedArray
-				a.recycle();
-				a = null;			
-				int iconTint;        
-					if (ColorUtils.isBrightColor(colorPrimary)) {
-						iconTint = Color.BLACK;
-					} else {
-						iconTint = Color.WHITE;
+				Intent launchIntent = pm.getLaunchIntentForPackage(appPackageName);
+				if (launchIntent != null) {
+					final ComponentName cn = pm.getLaunchIntentForPackage(appPackageName).getComponent();
+					if (cn != null) {
+					theme.applyStyle(pm.getActivityInfo(cn, 0).theme, false);
+					// Obtain the colorPrimary color from the attrs
+					TypedArray a = theme.obtainStyledAttributes(attrs);
+					// Do something with the color
+					final int colorPrimary = a.getColor(0, a.getColor(1, Color.WHITE));
+					// Make sure you recycle the TypedArray
+					a.recycle();
+					a = null;
+					int iconTint;
+						if (ColorUtils.isBrightColor(colorPrimary)) {
+							iconTint = Color.BLACK;
+						} else {
+							iconTint = Color.WHITE;
+						}
+						changeFloatingWindowColor(colorPrimary, iconTint);
 					}
-					changeFloatingWindowColor(colorPrimary, iconTint);
 				}
 			} catch (final NameNotFoundException e) {
 			e.printStackTrace();
-			}				
+			}
 		}
 	}
-    
+
     /**
      * Called after {@link #onStop} when the current activity is being
      * re-displayed to the user (the user has navigated back to it).  It will
