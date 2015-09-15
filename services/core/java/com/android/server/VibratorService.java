@@ -94,19 +94,18 @@ public class VibratorService extends IVibratorService.Stub
         private final int     mUsageHint;
         private final int     mUid;
         private final String  mOpPkg;
-        private final boolean mHighPriority;
 
         Vibration(IBinder token, long millis, int usageHint, int uid, String opPkg) {
-            this(token, millis, null, 0, usageHint, uid, false, opPkg);
+            this(token, millis, null, 0, usageHint, uid, opPkg);
         }
 
         Vibration(IBinder token, long[] pattern, int repeat, int usageHint, int uid,
                 String opPkg) {
-            this(token, 0, pattern, repeat, usageHint, uid, false, opPkg);
+            this(token, 0, pattern, repeat, usageHint, uid, opPkg);
         }
 
         private Vibration(IBinder token, long millis, long[] pattern,
-                int repeat, int usageHint, int uid, boolean hipri, String opPkg) {
+                int repeat, int usageHint, int uid, String opPkg) {
             mToken = token;
             mTimeout = millis;
             mStartTime = SystemClock.uptimeMillis();
@@ -115,7 +114,6 @@ public class VibratorService extends IVibratorService.Stub
             mUsageHint = usageHint;
             mUid = uid;
             mOpPkg = opPkg;
-            mHighPriority = hipri;
         }
 
         public void binderDied() {
@@ -274,17 +272,6 @@ public class VibratorService extends IVibratorService.Stub
     @Override // Binder call
     public void vibratePattern(int uid, String packageName, long[] pattern, int repeat,
             int usageHint, IBinder token) {
-        vibrateInternal(uid, packageName, pattern, repeat, usageHint, true, token);
-    }
-
-    @Override // Binder call
-    public void vibrateLowPriority(int uid, String packageName, long[] pattern, int repeat,
-            int usageHint, IBinder token) {
-        vibrateInternal(uid, packageName, pattern, repeat, usageHint, false, token);
-    }
-
-    private void vibrateInternal(int uid, String packageName, long[] pattern, int repeat,
-            int usageHint, boolean hipri, IBinder token) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.VIBRATE)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires VIBRATE permission");
@@ -309,7 +296,7 @@ public class VibratorService extends IVibratorService.Stub
                 return;
             }
 
-            Vibration vib = new Vibration(token, 0, pattern, repeat, usageHint, uid, hipri, packageName);
+            Vibration vib = new Vibration(token, pattern, repeat, usageHint, uid, packageName);
             try {
                 token.linkToDeath(vib, 0);
             } catch (RemoteException e) {
@@ -615,9 +602,7 @@ public class VibratorService extends IVibratorService.Stub
         }
 
         public void run() {
-            Process.setThreadPriority(mVibration.mHighPriority ?
-                    Process.THREAD_PRIORITY_URGENT_DISPLAY :
-                    Process.THREAD_PRIORITY_FOREGROUND - 1);
+            Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
             synchronized (this) {
                 final long[] pattern = mVibration.mPattern;
                 final int len = pattern.length;
