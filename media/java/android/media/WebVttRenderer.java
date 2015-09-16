@@ -637,6 +637,17 @@ class WebVttParser {
         return value * 1000 + Long.parseLong(parts[1]);
     }
 
+    public static String parseLinePositionValue(String s) {
+        // According to WebVTT spec, both line and position settings are provided as:
+        // 1.- a value
+        // 2.- an optional alignment setting (separated from value with comma character)
+        int commaAt;
+        if ((commaAt = s.indexOf(",")) > 0 && commaAt < s.length() - 1) {
+            return s.substring(0, commaAt);
+        }
+        return s;
+    }
+
     public static String timeToString(long timeMs) {
         return String.format("%d:%02d:%02d.%03d",
                 timeMs / 3600000, (timeMs / 60000) % 60,
@@ -880,15 +891,25 @@ class WebVttParser {
                     try {
                         /* TRICKY: we know that there are no spaces in value */
                         assert(value.indexOf(' ') < 0);
+                        value = parseLinePositionValue(value);
                         if (value.endsWith("%")) {
                             mCue.mSnapToLines = false;
                             mCue.mLinePosition = parseIntPercentage(value);
-                        } else if (value.matches(".*[^0-9].*")) {
-                            log_warning("cue setting", name,
-                                    "contains an invalid character", value);
                         } else {
-                            mCue.mSnapToLines = true;
-                            mCue.mLinePosition = Integer.parseInt(value);
+                            // According to spec, a hyphen can be used to
+                            // indicate a negative line number
+                            int sign = 1;
+                            if (value.startsWith("-") && value.length() > 1) {
+                                sign = -1;
+                                value = value.substring(1);
+                            }
+                            if (value.matches(".*[^0-9].*")) {
+                                log_warning("cue setting", name,
+                                        "contains an invalid character", value);
+                            } else {
+                                mCue.mSnapToLines = true;
+                                mCue.mLinePosition = sign * Integer.parseInt(value);
+                            }
                         }
                     } catch (NumberFormatException e) {
                         log_warning("cue setting", name,
@@ -897,6 +918,7 @@ class WebVttParser {
                     // TODO: add support for optional alignment value [,start|middle|end]
                 } else if (name.equals("position")) {
                     try {
+                        value = parseLinePositionValue(value);
                         mCue.mTextPosition = parseIntPercentage(value);
                     } catch (NumberFormatException e) {
                         log_warning("cue setting", name,
