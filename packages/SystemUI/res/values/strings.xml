@@ -802,7 +802,7 @@
     <string name="battery_saver_notification_text">Reduces performance and background data</string>
 
     <!-- Battery saver notification action text. [CHAR LIMIT=60] -->
-    <string name="battery_saver_notification_action_text">Turn off battery saver</string>
+    <string name="battery_saver_notification_action_text">Turn off</string>
 
     <!-- Text shown in place of notification contents when the notification is hidden on a secure lockscreen -->
     <string name="notification_hidden_text">Contents hidden</string>
@@ -929,5 +929,7 @@
     <string name="quick_settings_usb_tether_label">USB tethering</string>
     <!-- Screenshot qs tile -->
     <string name="quick_settings_screenshot">Screenshot</string>
-
+    
+    <!-- Battery Saver Dimiss -->
+    <string name="battery_saver_dismiss_title">Dismiss</string>
 </resources>
