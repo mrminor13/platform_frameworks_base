@@ -149,6 +149,7 @@ import com.android.systemui.R;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.omni.StatusHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.recent.ScreenPinningRequest;
 import com.android.systemui.statusbar.ActivatableNotificationView;
@@ -697,6 +698,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
     private int mNavigationBarMode;
+    private StatusHeaderMachine mStatusHeaderMachine;
 
     private ViewMediatorCallback mKeyguardViewMediatorCallback;
     private ScrimController mScrimController;
@@ -1254,6 +1256,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         resetUserSetupObserver();
 
         startGlyphRasterizeHack();
+        mStatusHeaderMachine = new StatusHeaderMachine(mContext);
+        mStatusHeaderMachine.addObserver(mHeader);
+        mStatusHeaderMachine.updateStatusHeaderStatus();
         return mStatusBarView;
     }
 
