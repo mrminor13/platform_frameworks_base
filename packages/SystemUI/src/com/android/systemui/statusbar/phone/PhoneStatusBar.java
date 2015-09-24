@@ -180,6 +180,7 @@ import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChan
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
+import com.android.internal.util.broken.Helpers;
 import com.android.systemui.statusbar.policy.BluetoothControllerImpl;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.CastControllerImpl;
@@ -353,9 +354,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     // Weather temperature
     TextView mWeatherTempView;
     private int mWeatherTempState;
+    private int mWeatherTempStyle;
     private int mWeatherTempColor;
     private int mWeatherTempFontStyle = FONT_NORMAL;
-    private int mWeatherTempStyle;
 
     // the icons themselves
     IconMerger mNotificationIcons;
@@ -555,21 +556,26 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.LOCKSCREEN_BLUR_RADIUS),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE),
+                    Settings.System.STATUS_BAR_SHOW_WEATHER_TEMP), 
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_SHOW_WEATHER_TEMP), 
+                    Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_WEATHER_COLOR),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE),
+                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE),
                     false, this, UserHandle.USER_ALL);
             update();
         }
 
-        @Override
+	    void unobserve() {
+            ContentResolver resolver = mContext.getContentResolver();
+            resolver.unregisterContentObserver(this);
+        }
+
+	    @Override
         public void onChange(boolean selfChange, Uri uri) {
             super.onChange(selfChange, uri);
 
@@ -581,12 +587,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         mHeader.updateBatteryIconSettings();
                         mKeyguardStatusBar.updateBatteryIconSettings();
             } else if (uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE))
+                    || uri.equals(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_WEATHER_COLOR))
                     || uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE))
-                    || uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE))) {
-				update();
+                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE))) {
+                restartSysUI();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.HEADS_UP_SNOOZE_TIME))) {
                 final int snoozeTime = Settings.System.getIntForUser(
@@ -697,6 +703,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
+    protected void restartSysUI() {
+        Helpers.restartSystemUI();
+    }
+	
     private void updateWeatherTextState(String temp, int color, int font) {
         if (mWeatherTempState == 0 || TextUtils.isEmpty(temp)) {
             mWeatherTempView.setVisibility(View.GONE);
