@@ -56,4 +56,8 @@
     <color name="notification_icon_color">#FFFFFFFF</color>
     <!-- Navigation button ripple color -->
     <color name="navbutton_ripple_color">#FFFFFFFF</color>
+
+    <!-- Status Bar temp -->
+    <color name="status_bar_temp_text_color">@color/status_bar_clock_color</color>
+
 </resources>

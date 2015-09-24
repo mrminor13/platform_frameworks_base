@@ -35,4 +35,7 @@
     <dimen name="detail_radio_group_padding_left">16dp</dimen>
     <dimen name="detail_radio_group_padding">8dp</dimen>
 
+    <!-- The font size for the temperature text -->
+    <dimen name="status_bar_temp_text_size">14sp</dimen>
+
 </resources>

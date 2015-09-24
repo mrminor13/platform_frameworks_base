@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="TextAppearance.StatusBar.WeatherTemp" parent="@*android:style/TextAppearance.StatusBar">
+        <item name="android:textSize">@dimen/status_bar_temp_text_size</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/status_bar_temp_text_color</item>
+    </style>
+
+</resources>
