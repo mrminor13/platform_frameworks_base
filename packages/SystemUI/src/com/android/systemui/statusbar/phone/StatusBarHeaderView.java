@@ -57,7 +57,7 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.BatteryMeterView;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
-import com.android.systemui.omni.StatusHeaderMachine;
+import com.android.systemui.omni.StatusBarHeaderMachine;
 import com.android.systemui.qs.QSPanel;
 import com.android.systemui.qs.QSTile;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -71,7 +71,7 @@ import java.text.NumberFormat;
  */
 public class StatusBarHeaderView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener,
         BatteryController.BatteryStateChangeCallback, NextAlarmController.NextAlarmChangeCallback,
-        WeatherController.Callback, StatusHeaderMachine.IStatusHeaderMachineObserver {
+        WeatherController.Callback, StatusBarHeaderMachine.IStatusBarHeaderMachineObserver {
 
     static final String TAG = "StatusBarHeaderView";
     private boolean mExpanded;
