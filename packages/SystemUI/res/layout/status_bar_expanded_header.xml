@@ -38,8 +38,7 @@
         android:layout_gravity="center"
         android:scaleType="centerCrop"
         android:visibility="gone"
-        android:adjustViewBounds="true"
-        android:src="@drawable/notification_header_bg" />
+        android:adjustViewBounds="true" />
 
     <com.android.systemui.statusbar.phone.MultiUserSwitch android:id="@+id/multi_user_switch"
         android:layout_width="@dimen/multi_user_switch_width_collapsed"
