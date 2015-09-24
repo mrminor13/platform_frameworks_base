@@ -343,6 +343,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private int mWeatherTempState;
     private int mWeatherTempColor;
     private int mWeatherTempFontStyle = FONT_NORMAL;
+    private int mWeatherTempStyle;
 
     // the icons themselves
     IconMerger mNotificationIcons;
@@ -350,10 +351,6 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     // [+>
     View mMoreIcon;
-
-    // Weather temperature
-    TextView mWeatherTempView;
-    private int mWeatherTempState;
 
     // expanded notifications
     NotificationPanelView mNotificationPanel; // the sliding/resizing panel within the notification window
@@ -554,6 +551,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_WEATHER_COLOR),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -571,7 +571,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_WEATHER_COLOR))
                     || uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE))) {
+                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE))
+                    || uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE))) {
 				update();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.HEADS_UP_SNOOZE_TIME))) {
@@ -660,6 +662,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             mWeatherTempFontStyle = Settings.System.getIntForUser(resolver,
                     Settings.System.STATUS_BAR_WEATHER_FONT_STYLE, FONT_NORMAL, mCurrentUserId);
+
+            mWeatherTempStyle = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE, 0,
+                    UserHandle.USER_CURRENT);
 
             final int oldWeatherState = mWeatherTempState;
             mWeatherTempState = Settings.System.getIntForUser(
@@ -1271,6 +1277,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         mWeatherController = new WeatherControllerImpl(mContext);
         mWeatherTempColor = Settings.System.getIntForUser(mContext.getContentResolver(),
                     Settings.System.STATUS_BAR_WEATHER_COLOR, 0xFFFFFFFF, mCurrentUserId);
+        mWeatherTempStyle = Settings.System.getIntForUser(
+                mContext.getContentResolver(), Settings.System.STATUS_BAR_WEATHER_TEMP_STYLE, 0,
+                UserHandle.USER_CURRENT);
+        if (mWeatherTempStyle == 0) {
+            mWeatherTempView = (TextView) mStatusBarView.findViewById(R.id.weather_temp);
+        } else {
+            mWeatherTempView = (TextView) mStatusBarView.findViewById(R.id.left_weather_temp);
+        }
+
         mWeatherTempState = Settings.System.getIntForUser(
                 mContext.getContentResolver(), Settings.System.STATUS_BAR_SHOW_WEATHER_TEMP, 0,
                 UserHandle.USER_CURRENT);
@@ -1284,6 +1299,21 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             });
         }
         updateWeatherTextState(mWeatherController.getWeatherInfo().temp, mWeatherTempColor, mWeatherTempFontStyle);
+
+        mKeyguardBottomArea.setPhoneStatusBar(this);
+        if (mAccessibilityController == null) {
+            mAccessibilityController = new AccessibilityController(mContext);
+        }
+        mKeyguardBottomArea.setAccessibilityController(mAccessibilityController);
+        if (mNextAlarmController == null) {
+            mNextAlarmController = new NextAlarmController(mContext);
+        }
+        if (mKeyguardMonitor == null) {
+            mKeyguardMonitor = new KeyguardMonitor();
+        }
+        if (mUserSwitcherController == null) {
+            mUserSwitcherController = new UserSwitcherController(mContext, mKeyguardMonitor);
+        }
 
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
                 (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
