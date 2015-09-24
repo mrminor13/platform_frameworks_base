@@ -59,6 +59,8 @@ import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.Xfermode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
@@ -269,6 +271,10 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private static final int BRIGHTNESS_CONTROL_LINGER_THRESHOLD = 20;
 
 
+    // Weather temperature
+    public static final int FONT_NORMAL = 0;
+    public static final int FONT_BOLD = 1;
+
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 100;
 
@@ -336,6 +342,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     TextView mWeatherTempView;
     private int mWeatherTempState;
     private int mWeatherTempColor;
+    private int mWeatherTempFontStyle = FONT_NORMAL;
 
     // the icons themselves
     IconMerger mNotificationIcons;
@@ -539,6 +546,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     Settings.System.LOCKSCREEN_BLUR_RADIUS),
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_SHOW_WEATHER_TEMP), 
                     false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.System.getUriFor(
@@ -559,7 +569,9 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         mHeader.updateBatteryIconSettings();
                         mKeyguardStatusBar.updateBatteryIconSettings();
             } else if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_WEATHER_COLOR))) {
+                    Settings.System.STATUS_BAR_WEATHER_COLOR))
+                    || uri.equals(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE))) {
 				update();
             } else if (uri.equals(Settings.System.getUriFor(
                     Settings.System.HEADS_UP_SNOOZE_TIME))) {
@@ -646,12 +658,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mWeatherTempColor = Settings.System.getIntForUser(resolver,
                     Settings.System.STATUS_BAR_WEATHER_COLOR, 0xFFFFFFFF, mCurrentUserId);
 
+            mWeatherTempFontStyle = Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_WEATHER_FONT_STYLE, FONT_NORMAL, mCurrentUserId);
+
             final int oldWeatherState = mWeatherTempState;
             mWeatherTempState = Settings.System.getIntForUser(
                     resolver, Settings.System.STATUS_BAR_SHOW_WEATHER_TEMP, 0,
                     UserHandle.USER_CURRENT);
             if (oldWeatherState != mWeatherTempState) {
-                updateWeatherTextState(mWeatherController.getWeatherInfo().temp, mWeatherTempColor);
+                updateWeatherTextState(mWeatherController.getWeatherInfo().temp,
+                        mWeatherTempColor, mWeatherTempFontStyle);
             }
             mTickerEnabled = Settings.System.getIntForUser(
                     resolver, Settings.System.STATUS_BAR_TICKER_ENABLED,
@@ -663,7 +679,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
         }
     }
 
-    private void updateWeatherTextState(String temp, int color) {
+    private void updateWeatherTextState(String temp, int color, int font) {
         if (mWeatherTempState == 0 || TextUtils.isEmpty(temp)) {
             mWeatherTempView.setVisibility(View.GONE);
             return;
@@ -676,6 +692,15 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mWeatherTempView.setText(temp.substring(0, temp.length() - 1));
         }
         mWeatherTempView.setTextColor(color);
+        switch (font) {
+            default:
+            case FONT_NORMAL:
+                mWeatherTempView.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+                break;
+            case FONT_BOLD:
+                mWeatherTempView.setTypeface(Typeface.create("sans-serif", Typeface.BOLD));
+                break;
+        }
         mWeatherTempView.setVisibility(View.VISIBLE);
     }
 
@@ -1254,11 +1279,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             mWeatherController.addCallback(new WeatherController.Callback() {
                 @Override
                 public void onWeatherChanged(WeatherInfo temp) {
-                    updateWeatherTextState(temp.temp, mWeatherTempColor);
+                    updateWeatherTextState(temp.temp, mWeatherTempColor, mWeatherTempFontStyle);                    
                 }
             });
         }
-        updateWeatherTextState(mWeatherController.getWeatherInfo().temp, mWeatherTempColor);
+        updateWeatherTextState(mWeatherController.getWeatherInfo().temp, mWeatherTempColor, mWeatherTempFontStyle);
 
         mKeyguardUserSwitcher = new KeyguardUserSwitcher(mContext,
                 (ViewStub) mStatusBarWindow.findViewById(R.id.keyguard_user_switcher),
