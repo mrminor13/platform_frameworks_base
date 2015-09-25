@@ -54,6 +54,8 @@ import com.android.server.pm.PackageManagerService;
 import android.util.Log;
 import android.view.WindowManager;
 
+import com.android.internal.util.broken.Helpers;
+
 public final class ShutdownThread extends Thread {
     // constants
     private static final String TAG = "ShutdownThread";
@@ -64,6 +66,7 @@ public final class ShutdownThread extends Thread {
     private static final int MAX_RADIO_WAIT_TIME = 12*1000;
 
     private static final String SOFT_REBOOT = "soft_reboot";
+    private static final String SYSTEMUI_REBOOT = "systemui_reboot";
 
     // length of vibration before shutting down
     private static final int SHUTDOWN_VIBRATE_MS = 500;
@@ -190,21 +193,25 @@ public final class ShutdownThread extends Thread {
                                 boolean softReboot = false;
                                 ListView reasonsList = ((AlertDialog)dialog).getListView();
                                 int selected = reasonsList.getCheckedItemPosition();
-                                if (selected != ListView.INVALID_POSITION) {
-                                    String actions[] = context.getResources().getStringArray(
-                                            com.android.internal.R.array.shutdown_reboot_actions);
-                                    if (selected >= 0 && selected < actions.length) {
-                                        mRebootReason = actions[selected];
-                                        if (actions[selected].equals(SOFT_REBOOT)) {
-                                            doSoftReboot();
-                                            return;
-                                        }
-                                    }
-                                }
+            if (selected != ListView.INVALID_POSITION) {
+                String actions[] = context.getResources().getStringArray(
+                        com.android.internal.R.array.shutdown_reboot_actions);
+                if (actions[selected].equals(SYSTEMUI_REBOOT)) {
+                    mRebootReason = actions[selected];
+                    doSystemUIReboot();
+                    return;
+                } else if (selected >= 0 && selected < actions.length) {
+                    mRebootReason = actions[selected];
+                    if (actions[selected].equals(SOFT_REBOOT)) {
+                        doSoftReboot();
+                        return;
+                    }
+                }
+            }
 
-                                mReboot = true;
-                            }
-                            beginShutdownSequence(context);
+            mReboot = true;
+        }
+        beginShutdownSequence(context);
                         }
                   });
 
@@ -230,6 +237,10 @@ public final class ShutdownThread extends Thread {
         } catch (RemoteException e) {
             Log.e(TAG, "failure trying to perform soft reboot", e);
         }
+    }
+
+    private static void doSystemUIReboot() {
+        Helpers.restartSystemUI();
     }
 
     private static class CloseDialogReceiver extends BroadcastReceiver
