@@ -91,10 +91,10 @@
     <!-- The platform's desired minimum size for a dialog's width when it
          is along the major axis (that is the screen is landscape).  This may
          be either a fraction or a dimension. -->
-    <item type="dimen" name="dialog_min_width_major">65%</item>
-
+      <!-- Decrease width of dialog pop ups - xWASABI -->  
+         <item type="dimen" name="dialog_min_width_major">35%</item>
     <!-- The platform's desired fixed width for a dialog along the major axis
-         (the screen is in landscape). This may be either a fraction or a dimension.-->
+        (the screen is in landscape). This may be either a fraction or a dimension.-->
     <item type="dimen" name="dialog_fixed_width_major">320dp</item>
     <!-- The platform's desired fixed width for a dialog along the minor axis
          (the screen is in portrait). This may be either a fraction or a dimension.-->
