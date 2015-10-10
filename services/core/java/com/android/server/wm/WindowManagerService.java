@@ -302,7 +302,6 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String SIZE_OVERRIDE = "ro.config.size_override";
 
     private static final int MAX_SCREENSHOT_RETRIES = 3;
-    private static final int WINDOW_EXITING_TIME_OUT = 6000;
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.emulator.circular";
 
@@ -9990,11 +9989,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int N = windows.size();
                 for (i=N-1; i>=0; i--) {
                     WindowState w = windows.get(i);
-		    if(w.mExiting && (w.mLastFreezeDuration > WINDOW_EXITING_TIME_OUT)
-                        && w.mInputChannel == null) {
-                        removeWindowInnerLocked(w.mSession, w);
-                    }
-
                     final TaskStack stack = w.getStack();
                     if (stack == null && w.getAttrs().type != TYPE_PRIVATE_PRESENTATION) {
                         continue;
