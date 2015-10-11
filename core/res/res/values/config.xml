@@ -82,17 +82,17 @@
     <bool name="config_sendAudioBecomingNoisy">true</bool>
 
     <!-- The duration (in milliseconds) of a short animation. -->
-    <integer name="config_shortAnimTime">200</integer>
+    <integer name="config_shortAnimTime">100</integer>
 
     <!-- The duration (in milliseconds) of a medium-length animation. -->
-    <integer name="config_mediumAnimTime">400</integer>
+    <integer name="config_mediumAnimTime">200</integer>
 
     <!-- The duration (in milliseconds) of a long animation. -->
-    <integer name="config_longAnimTime">500</integer>
+    <integer name="config_longAnimTime">250</integer>
 
     <!-- The duration (in milliseconds) of the activity open/close and fragment open/close animations. -->
-    <integer name="config_activityShortDur">150</integer>
-    <integer name="config_activityDefaultDur">220</integer>
+    <integer name="config_activityShortDur">75</integer>
+    <integer name="config_activityDefaultDur">110</integer>
 
     <!-- Duration for the dim animation behind a dialog.  This may be either
          a percentage, which is relative to the duration of the enter/open
@@ -2066,11 +2066,11 @@
     <bool translatable="false" name="config_sms_decode_gsm_8bit_data">false</bool>
 
     <!-- Package name providing default WebView implementation. -->
-    <string name="config_webViewPackageName" translatable="false">com.google.android.webview</string>
+    <string name="config_webViewPackageName" translatable="false">com.android.webview</string>
 
     <!-- Package name providing alternate WebView implementation.
          Fall back to config_webViewPackageName if not available. -->
-    <string name="config_alternateWebViewPackageName" translatable="false">com.android.webview</string>
+    <string name="config_alternateWebViewPackageName" translatable="false">com.google.android.webview</string>
 
     <!-- If EMS is not supported, framework breaks down EMS into single segment SMS
          and adds page info " x/y". This config is used to set which carrier doesn't

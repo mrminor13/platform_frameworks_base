@@ -22,6 +22,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityOptions;
 import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -32,6 +33,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -186,7 +189,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
-    public static final boolean DUMPTRUCK = true; // extra dumpsys info
+    public static final boolean DUMPTRUCK = false; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
     public static final boolean DEBUG_MEDIA = false;
     public static final boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
@@ -214,6 +217,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
     private static final long AUTOHIDE_TIMEOUT_MS = 3000;
+    private static final long AUTOHIDE_TIMEOUT_MS_PROVISIONING = 0;
 
     /** The minimum delay in ms between reports of notification visibility. */
     private static final int VISIBILITY_REPORT_MIN_DELAY_MS = 500;
@@ -228,11 +232,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build();
 
-    public static final int FADE_KEYGUARD_START_DELAY = 100;
-    public static final int FADE_KEYGUARD_DURATION = 300;
+    public static final int FADE_KEYGUARD_START_DELAY = 50;
+    public static final int FADE_KEYGUARD_DURATION = 150;
 
     /** Allow some time inbetween the long press for back and recents. */
-    private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
+    private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 100;
 
     /** If true, the system is in the half-boot-to-decryption-screen state.
      * Prudently disable QS and notifications.  */
@@ -1725,7 +1729,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                                 + mBackdropBack.getDrawable());
                     }
                     mBackdropFront.animate()
-                            .setDuration(250)
+                            .setDuration(150)
                             .alpha(0f).withEndAction(mHideBackdropFront);
                 }
             }
@@ -1742,7 +1746,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                         // if mScrimSrcModeEnabled. Note that 0.001 is rounded down to 0 in libhwui.
                         .alpha(0.002f)
                         .setInterpolator(mBackdropInterpolator)
-                        .setDuration(300)
+                        .setDuration(200)
                         .setStartDelay(0)
                         .withEndAction(new Runnable() {
                             @Override
@@ -2537,7 +2541,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private void scheduleAutohide() {
         cancelAutohide();
-        mHandler.postDelayed(mAutohide, AUTOHIDE_TIMEOUT_MS);
+        mHandler.postDelayed(mAutohide, isDeviceProvisioned()
+                ? AUTOHIDE_TIMEOUT_MS : AUTOHIDE_TIMEOUT_MS_PROVISIONING);
     }
 
     private void checkUserAutohide(View v, MotionEvent event) {
@@ -3855,6 +3860,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
     private void handleLongPressBackRecents(View v) {
         try {
             boolean sendBackLongPress = false;
+            boolean hijackRecentsLongPress = false;
             IActivityManager activityManager = ActivityManagerNative.getDefault();
             boolean isAccessiblityEnabled = mAccessibilityManager.isEnabled();
             if (activityManager.isInLockTaskMode() && !isAccessiblityEnabled) {
@@ -3870,12 +3876,16 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                     // If we aren't pressing recents right now then they presses
                     // won't be together, so send the standard long-press action.
                     sendBackLongPress = true;
+                } else if ((v.getId() == R.id.recent_apps)) {
+                    hijackRecentsLongPress = true;
                 }
                 mLastLockToAppLongPress = time;
             } else {
                 // If this is back still need to handle sending the long-press event.
                 if (v.getId() == R.id.back) {
                     sendBackLongPress = true;
+                } else if (v.getId() == R.id.recent_apps) {
+                    hijackRecentsLongPress = true;
                 } else if (isAccessiblityEnabled && activityManager.isInLockTaskMode()) {
                     // When in accessibility mode a long press that is recents (not back)
                     // should stop lock task.
@@ -3889,9 +3899,42 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
                 keyButtonView.sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.FLAG_LONG_PRESS);
                 keyButtonView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
             }
+            if (hijackRecentsLongPress) {
+                final ActivityManager am =
+                        (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                ActivityManager.RunningTaskInfo lastTask = getLastTask(am);
+
+                if (lastTask != null) {
+                    if (DEBUG) Log.d(TAG, "switching to " + lastTask.topActivity.getPackageName());
+                    am.moveTaskToFront(lastTask.id, ActivityManager.MOVE_TASK_NO_USER_ACTION);
+                }
+            }
         } catch (RemoteException e) {
             Log.d(TAG, "Unable to reach activity manager", e);
         }
+    }
+
+    private ActivityManager.RunningTaskInfo getLastTask(final ActivityManager am) {
+        final String defaultHomePackage = resolveCurrentLauncherPackage();
+        List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(5);
+
+        for (int i = 1; i < tasks.size(); i++) {
+            String packageName = tasks.get(i).topActivity.getPackageName();
+            if (!packageName.equals(defaultHomePackage)
+                    && !packageName.equals(mContext.getPackageName())) {
+                return tasks.get(i);
+            }
+        }
+
+        return null;
+    }
+
+    private String resolveCurrentLauncherPackage() {
+        final Intent launcherIntent = new Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_HOME);
+        final PackageManager pm = mContext.getPackageManager();
+        final ResolveInfo launcherInfo = pm.resolveActivity(launcherIntent, 0);
+        return launcherInfo.activityInfo.packageName;
     }
 
     // Recents
