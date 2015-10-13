@@ -560,7 +560,7 @@ status_t ResStringPool::setTo(const void* data, size_t size, bool copyData)
 
         if ((mHeader->flags&ResStringPool_header::UTF8_FLAG &&
                 ((uint8_t*)mStrings)[mStringPoolSize-1] != 0) ||
-                (!mHeader->flags&ResStringPool_header::UTF8_FLAG &&
+                (~mHeader->flags&ResStringPool_header::UTF8_FLAG &&
                 ((uint16_t*)mStrings)[mStringPoolSize-1] != 0)) {
             ALOGW("Bad string block: last string is not 0-terminated\n");
             return (mError=BAD_TYPE);
@@ -802,13 +802,13 @@ const char* ResStringPool::string8At(size_t idx, size_t* outLen) const
         if (off < (mStringPoolSize-1)) {
             const uint8_t* strings = (uint8_t*)mStrings;
             const uint8_t* str = strings+off;
+            decodeLength(&str);
             *outLen = decodeLength(&str);
-            size_t encLen = decodeLength(&str);
-            if ((uint32_t)(str+encLen-strings) < mStringPoolSize) {
+            if ((uint32_t)(str+*outLen-strings) < mStringPoolSize) {
                 return (const char*)str;
             } else {
                 ALOGW("Bad string block: string #%d extends to %d, past end at %d\n",
-                        (int)idx, (int)(str+encLen-strings), (int)mStringPoolSize);
+                        (int)idx, (int)(str+*outLen-strings), (int)mStringPoolSize);
             }
         } else {
             ALOGW("Bad string block: string #%d entry is at %d, past end at %d\n",

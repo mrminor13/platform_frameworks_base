@@ -77,7 +77,7 @@ public class ImageView extends View {
     private int mResource = 0;
     private Matrix mMatrix;
     private ScaleType mScaleType;
-    private boolean mHaveFrame = false;
+    private boolean mHaveSize = false;
     private boolean mAdjustViewBounds = false;
     private int mMaxWidth = Integer.MAX_VALUE;
     private int mMaxHeight = Integer.MAX_VALUE;
@@ -1083,14 +1083,22 @@ public class ImageView extends View {
 
     @Override
     protected boolean setFrame(int l, int t, int r, int b) {
-        boolean changed = super.setFrame(l, t, r, b);
-        mHaveFrame = true;
+        // Historically, setFrame was used to update the image bounds on layout
+        // changes, and was (incorrectly) publically exposed for that. We now
+        // update the bounds in onSizeChanged(), but keep the method override
+        // so that we still expose it.
+        return super.setFrame(l, t, r, b);
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mHaveSize = true;
         configureBounds();
-        return changed;
     }
 
     private void configureBounds() {
-        if (mDrawable == null || !mHaveFrame) {
+        if (mDrawable == null || !mHaveSize) {
             return;
         }
 

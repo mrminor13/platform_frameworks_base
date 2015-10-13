@@ -655,9 +655,11 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             }
         }
 
-        PrinterId printerId = mCurrentPrinter.getId();
-        final int index = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
-        mDestinationSpinner.setSelection(index);
+        if (mCurrentPrinter != null) {
+            PrinterId printerId = mCurrentPrinter.getId();
+            final int index = mDestinationSpinnerAdapter.getPrinterIndex(printerId);
+            mDestinationSpinner.setSelection(index);
+        }
     }
 
     private void startAdvancedPrintOptionsActivity(PrinterInfo printer) {
@@ -956,7 +958,7 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
         if (newFragment != null) {
             transaction.add(R.id.embedded_content_container, newFragment, FRAGMENT_TAG);
         }
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
         getFragmentManager().executePendingTransactions();
     }
 
@@ -1746,6 +1748,9 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
             mProgressMessageController.cancel();
             mPrinterRegistry.setTrackedPrinter(null);
             mSpoolerProvider.destroy();
+            if (mPrintedDocument.isUpdating()) {
+                mPrintedDocument.cancel();
+            }
             mPrintedDocument.finish();
             mPrintedDocument.destroy();
             mPrintPreviewController.destroy(new Runnable() {

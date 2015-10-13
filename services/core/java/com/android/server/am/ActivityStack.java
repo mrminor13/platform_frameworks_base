@@ -2889,6 +2889,13 @@ final class ActivityStack {
 
         finishActivityResultsLocked(r, resultCode, resultData);
 
+        // If the finishing task is launched from Home and is not
+        // the top task, then set the next task to return to Home
+        if (task != topTask() && r.frontOfTask && task.isOverHomeStack()) {
+            final int taskNdx = mTaskHistory.indexOf(task) + 1;
+            mTaskHistory.get(taskNdx).setTaskToReturnTo(HOME_ACTIVITY_TYPE);
+        }
+
         if (mResumedActivity == r) {
             boolean endTask = index <= 0;
             if (DEBUG_VISIBILITY || DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
@@ -3762,7 +3769,7 @@ final class ActivityStack {
         int numTasks = mTaskHistory.size();
         for (int taskNdx = numTasks - 1; taskNdx >= 1; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
-            if (task.isOverHomeStack()) {
+            if (task.isOverHomeStack() && task.mActivities != null && task.mActivities.size() > 0) {
                 break;
             }
             if (taskNdx == 1) {
