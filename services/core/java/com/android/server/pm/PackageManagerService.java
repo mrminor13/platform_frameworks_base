@@ -5217,14 +5217,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public ResolveInfo resolveService(Intent intent, String resolvedType, int flags, int userId) {
-        List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
         if (!sUserManager.exists(userId)) return null;
-        if (query != null) {
-            if (query.size() >= 1) {
-                // If there is more than one service with the same priority,
-                // just arbitrarily pick the first one.
-                return query.get(0);
-            }
+        List<ResolveInfo> query = queryIntentServices(intent, resolvedType, flags, userId);
+        if (!query.isEmpty()) {
+          // If there is more than one service with the same priority,
+          // just arbitrarily pick the first one.
+          return query.get(0);
         }
         return null;
     }
@@ -5262,7 +5260,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return mServices.queryIntentForPackage(intent, resolvedType, flags, pkg.services,
                         userId);
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -5299,7 +5297,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return mProviders.queryIntentForPackage(
                         intent, resolvedType, flags, pkg.providers, userId);
             }
-            return null;
+            return Collections.emptyList();
         }
     }
 
@@ -7148,7 +7146,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                             if (sysPs.pkg != null && sysPs.pkg.libraryNames != null) {
                                 for (int j=0; j<sysPs.pkg.libraryNames.size(); j++) {
                                     if (name.equals(sysPs.pkg.libraryNames.get(j))) {
-                                        allowed = true;
                                         allowed = true;
                                         break;
                                     }
@@ -13871,9 +13868,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 PreferredActivity pa = it.next();
                 // Mark entry for removal only if it matches the package name
                 // and the entry is of type "always".
-                if (packageName == null ||
-                        (pa.mPref.mComponent.getPackageName().equals(packageName)
-                                && pa.mPref.mAlways)) {
+                if ((packageName == null ||
+                        pa.mPref.mComponent.getPackageName().equals(packageName))
+                                && pa.mPref.mAlways) {
                     if (removed == null) {
                         removed = new ArrayList<PreferredActivity>();
                     }
@@ -13964,9 +13961,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final Iterator<PreferredActivity> it = pir.filterIterator();
                 while (it.hasNext()) {
                     final PreferredActivity pa = it.next();
-                    if (packageName == null
-                            || (pa.mPref.mComponent.getPackageName().equals(packageName)
-                                    && pa.mPref.mAlways)) {
+                    if ((packageName == null
+                            || pa.mPref.mComponent.getPackageName().equals(packageName))
+                                    && pa.mPref.mAlways) {
                         if (outFilters != null) {
                             outFilters.add(new IntentFilter(pa));
                         }
@@ -14336,6 +14333,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public ComponentName getHomeActivities(List<ResolveInfo> allHomeCandidates) {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_HOME);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
 
         final int callingUserId = UserHandle.getCallingUserId();
         List<ResolveInfo> list = queryIntentActivities(intent, null,

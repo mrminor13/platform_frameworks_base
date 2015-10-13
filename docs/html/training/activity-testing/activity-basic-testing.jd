@@ -218,7 +218,7 @@ connected, then click <strong>OK</strong>.</li>
 </ol>
 <p>For example, if the test case passes with no errors, the result should look
 like this:</p>
-<img src="{@docRoot}images/training/activity-testing_lesson2_MyFirstTestActivityTest_result.png" alt="" />
+<img src="{@docRoot}images/training/lesson2_MyFirstTestActivityTest_result.png" alt="" />
 <p class="img-caption">
   <strong>Figure 1.</strong> Result of a test with no errors.
 </p>

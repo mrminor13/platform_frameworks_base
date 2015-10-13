@@ -120,6 +120,9 @@ public class KeyStore {
     public static KeyStore getInstance() {
         IKeystoreService keystore = IKeystoreService.Stub.asInterface(ServiceManager
                 .getService("android.security.keystore"));
+        if (keystore == null) {
+            return null;
+        }
         return new KeyStore(keystore);
     }
 

@@ -549,9 +549,7 @@ final class ActivityRecord {
             noDisplay = ent != null && ent.array.getBoolean(
                     com.android.internal.R.styleable.Window_windowNoDisplay, false);
 
-            if ((!_componentSpecified || _launchedFromUid == Process.myUid()
-                    || _launchedFromUid == 0) &&
-                    Intent.ACTION_MAIN.equals(_intent.getAction()) &&
+            if (Intent.ACTION_MAIN.equals(_intent.getAction()) &&
                     _intent.hasCategory(Intent.CATEGORY_HOME) &&
                     _intent.getCategories().size() == 1 &&
                     _intent.getData() == null &&

@@ -66,6 +66,7 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.SystemService;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
@@ -467,7 +468,7 @@ public class WindowManagerService extends IWindowManager.Stub
     /** All DisplayContents in the world, kept here */
     SparseArray<DisplayContent> mDisplayContents = new SparseArray<>(2);
 
-    int mRotation = 0;
+    int mRotation = SystemProperties.getInt("persist.panel.orientation", 0) / 90;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     boolean mAltOrientation = false;
 
@@ -6555,6 +6556,10 @@ public class WindowManagerService extends IWindowManager.Stub
             // Rotation updates have been paused temporarily.  Defer the update until
             // updates have been resumed.
             if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation, rotation is paused.");
+            return false;
+        }
+
+        if(SystemService.isRunning("bootanim")) {
             return false;
         }
 
