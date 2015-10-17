@@ -32,6 +32,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.android.systemui.R;
+import com.android.systemui.AbstractBatteryView;
 
 public class BarTransitions {
     private static final boolean DEBUG = false;
@@ -65,6 +66,9 @@ public class BarTransitions {
             mView.setBackground(mBarBackground);
         }
     }
+
+			public void updateBattery(AbstractBatteryView battery) {
+			}
 
     public int getMode() {
         return mMode;
