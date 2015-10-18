@@ -271,6 +271,7 @@ public interface MetricsConstants {
     public static final int QS_BRIGHTNESS = 239;
     public static final int QS_SCREEN_OFF = 240;
     public static final int QS_SCREENSHOT = 241;
+    public static final int QS_VOLUME = 242;
 
     // Location tile
     public static final int QS_LOCATION_DETAILS = 249;
