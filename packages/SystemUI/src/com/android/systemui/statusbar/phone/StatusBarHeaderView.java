@@ -35,6 +35,7 @@ import android.net.Uri;
 import android.provider.AlarmClock;
 import android.provider.CalendarContract;
 import android.provider.CalendarContract.Events;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -219,6 +220,12 @@ public class StatusBarHeaderView extends RelativeLayout implements View.OnClickL
             }
         });
         requestCaptureValues();
+
+        // RenderThread is doing more harm than good when touching the header (to expand quick
+        // settings), so disable it for this view
+        ((RippleDrawable) getBackground()).setForceSoftware(true);
+        ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
+        ((RippleDrawable) mSystemIconsSuperContainer.getBackground()).setForceSoftware(true);
     }
 
     @Override

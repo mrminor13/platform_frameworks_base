@@ -111,8 +111,33 @@ public class DozeScrimController {
         mHandler.post(mPulseIn);
     }
 
+    /**
+     * Aborts pulsing immediately.
+     */
+    public void abortPulsing() {
+        cancelPulsing();
+        if (mDozing) {
+            mScrimController.setDozeBehindAlpha(1f);
+            mScrimController.setDozeInFrontAlpha(1f);
+        }
+    }
+
+    public void onScreenTurnedOn() {
+        if (isPulsing()) {
+            final boolean pickup = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
+            startScrimAnimation(true /* inFront */, 0f,
+                    mDozeParameters.getPulseInDuration(pickup),
+                    pickup ? mPulseInInterpolatorPickup : mPulseInInterpolator,
+                    mPulseInFinished);
+        }
+    }
+
     public boolean isPulsing() {
         return mPulseCallback != null;
+    }
+
+    public boolean isDozing() {
+        return mDozing;
     }
 
     private void cancelPulsing() {
@@ -149,12 +174,11 @@ public class DozeScrimController {
 
     private void startScrimAnimation(final boolean inFront, float target, long duration,
             Interpolator interpolator) {
-        startScrimAnimation(inFront, target, duration, interpolator, 0 /* delay */,
-                null /* endRunnable */);
+        startScrimAnimation(inFront, target, duration, interpolator, null /* endRunnable */);
     }
 
     private void startScrimAnimation(final boolean inFront, float target, long duration,
-            Interpolator interpolator, long delay, final Runnable endRunnable) {
+            Interpolator interpolator, final Runnable endRunnable) {
         Animator current = getCurrentAnimator(inFront);
         if (current != null) {
             float currentTarget = getCurrentTarget(inFront);
@@ -173,7 +197,6 @@ public class DozeScrimController {
         });
         anim.setInterpolator(interpolator);
         anim.setDuration(duration);
-        anim.setStartDelay(delay);
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -233,12 +256,6 @@ public class DozeScrimController {
                     + DozeLog.pulseReasonToString(mPulseReason));
             if (!mDozing) return;
             DozeLog.tracePulseStart(mPulseReason);
-            final boolean pickup = mPulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
-            startScrimAnimation(true /* inFront */, 0f,
-                    mDozeParameters.getPulseInDuration(pickup),
-                    pickup ? mPulseInInterpolatorPickup : mPulseInInterpolator,
-                    mDozeParameters.getPulseInDelay(pickup),
-                    mPulseInFinished);
 
             // Signal that the pulse is ready to turn the screen on and draw.
             pulseStarted();
@@ -260,7 +277,7 @@ public class DozeScrimController {
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
             startScrimAnimation(true /* inFront */, 1f, mDozeParameters.getPulseOutDuration(),
-                    mPulseOutInterpolator, 0 /* delay */, mPulseOutFinished);
+                    mPulseOutInterpolator, mPulseOutFinished);
         }
     };
 
