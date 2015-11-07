@@ -75,10 +75,16 @@ public class NavigationBarView extends LinearLayout {
     final static boolean DEBUG = false;
     final static String TAG = "PhoneStatusBar/NavigationBarView";
 
+    private final static int HIDE_IME_ARROW = 0;
+    private final static int SHOW_IME_ARROW = 1;
+
     // slippery nav bar when everything is disabled, e.g. during setup
     final static boolean SLIPPERY_WHEN_DISABLED = true;
 
     private boolean mIsHandlerCallbackActive = false;
+
+    private boolean mImeArrowVisibility;
+    private boolean mIsImeArrowVisible = false;
 
     final Display mDisplay;
     View mCurrentView = null;
@@ -349,6 +355,14 @@ public class NavigationBarView extends LinearLayout {
         return (ViewGroup) mCurrentView.findViewById(R.id.nav_buttons);
     }
 
+    public View getLeftImeArrowButton() {
+        return mCurrentView.findViewById(R.id.ime_left);
+    }
+
+    public View getRightImeArrowButton() {
+        return mCurrentView.findViewById(R.id.ime_right);
+    }
+
     private void getIcons(Resources res) {
         mBackIcon = res.getDrawable(R.drawable.ic_sysbar_back);
         mBackLandIcon = mBackIcon;
@@ -394,8 +408,14 @@ public class NavigationBarView extends LinearLayout {
 
         ((ImageView)getRecentsButton()).setImageDrawable(mVertical ? mRecentLandIcon : mRecentIcon);
 
-        final boolean showImeButton = ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0);
+        final boolean showImeButton = ((hints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0
+                    && !mImeArrowVisibility);
         getImeSwitchButton().setVisibility(showImeButton ? View.VISIBLE : View.INVISIBLE);
+
+        mIsImeArrowVisible = (backAlt && mImeArrowVisibility);
+        getLeftImeArrowButton().setVisibility(mIsImeArrowVisible ? View.VISIBLE : View.GONE);
+        getRightImeArrowButton().setVisibility(mIsImeArrowVisible ? View.VISIBLE : View.GONE);
+
         // Update menu button in case the IME state has changed.
         setMenuVisibility(mShowMenu, true);
 
@@ -814,6 +834,8 @@ public class NavigationBarView extends LinearLayout {
                     Settings.System.DIM_NAV_BUTTONS_TOUCH_ANYWHERE), false, this);
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.DOUBLE_TAP_SLEEP_NAVBAR), false, this);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_IME_ARROWS), false, this);
 
             // intialize mModlockDisabled
             onChange(false);
@@ -856,6 +878,9 @@ public class NavigationBarView extends LinearLayout {
             mDoubleTapToSleep = (Settings.System.getIntForUser(resolver,
                     Settings.System.DOUBLE_TAP_SLEEP_NAVBAR, 0,
                     UserHandle.USER_CURRENT) == 1);
+            mImeArrowVisibility = (Settings.System.getIntForUser(resolver,
+                    Settings.System.STATUS_BAR_IME_ARROWS, HIDE_IME_ARROW,
+                    UserHandle.USER_CURRENT) == SHOW_IME_ARROW);
         }
     }
 
