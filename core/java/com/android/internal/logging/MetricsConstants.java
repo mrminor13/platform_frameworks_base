@@ -275,6 +275,9 @@ public interface MetricsConstants {
     // Location tile
     public static final int QS_LOCATION_DETAILS = 249;
 
+    // Lock screen weather settings
+    public static final int LOCKSCREEN_WEATHER_SETTINGS = 248;
+
     // These constants must match those in the analytic pipeline, do not edit.
     // Add temporary values to the top of MetricsLogger instead.
 

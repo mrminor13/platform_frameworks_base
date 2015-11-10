@@ -677,7 +677,7 @@ public class BatteryMeterView extends View implements DemoMode,
         private static final boolean SINGLE_DIGIT_PERCENT = false;
         private static final boolean SHOW_100_PERCENT = false;
 
-        public static final float STROKE_WITH = 10.5f;
+        public static final float STROKE_WITH = 8.5f;
 
         private boolean mDisposed;
 
