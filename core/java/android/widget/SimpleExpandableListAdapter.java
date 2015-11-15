@@ -246,7 +246,12 @@ public class SimpleExpandableListAdapter extends BaseExpandableListAdapter {
         for (int i = 0; i < len; i++) {
             TextView v = (TextView)view.findViewById(to[i]);
             if (v != null) {
-                v.setText((String)data.get(from[i]));
+                Object obj = data.get(from[i]);
+                if (obj instanceof String) {
+                    v.setText((String)data.get(from[i]));
+                } else {
+                    v.setText(data.get(from[i]).toString());
+                }
             }
         }
     }
