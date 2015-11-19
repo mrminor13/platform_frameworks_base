@@ -524,12 +524,12 @@ public class BatteryMeterView extends View implements DemoMode,
             mFramePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mFramePaint.setColor(mFrameColor);
             mFramePaint.setDither(true);
-            mFramePaint.setStrokeWidth(0);
-            mFramePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            mFramePaint.setStrokeWidth(3);
+            mFramePaint.setStyle(Paint.Style.STROKE);
 
             mBatteryPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mBatteryPaint.setDither(true);
-            mBatteryPaint.setStrokeWidth(0);
+            mBatteryPaint.setStrokeWidth(3);
             mBatteryPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
             mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -816,8 +816,8 @@ public class BatteryMeterView extends View implements DemoMode,
         public static final boolean ENABLE_PERCENT = true;
 
         private static final int FULL = 96;
-
-        public static final float STROKE_WITH = 6.5f;
+								// Decrease the width of Circle Batteryf rom 6.5 to 10.5
+        public static final float STROKE_WITH = 10.5f;
 
         private boolean mDisposed;
 

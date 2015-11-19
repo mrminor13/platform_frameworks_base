@@ -57,6 +57,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -400,6 +401,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
     private boolean mShowCarrierInPanel = false;
 
+    // Twisted logo
+    private boolean mTwistedLogo;
+	   private int mTwistedLogoColor;
+    private ImageView twistedLogo;
+
     // position
     int[] mPositionTmp = new int[2];
     boolean mExpandedVisible;
@@ -568,6 +574,12 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             resolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUS_BAR_WEATHER_FONT_STYLE),
                     false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_TWISTED_LOGO),
+                    false, this, UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_TWISTED_LOGO_COLOR),
+                    false, this, UserHandle.USER_ALL);
             update();
         }
 
@@ -675,6 +687,14 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
 
             mBlurRadius = Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.LOCKSCREEN_BLUR_RADIUS, 14);
+
+            mTwistedLogo = Settings.System.getIntForUser(
+                    resolver, Settings.System.STATUS_BAR_TWISTED_LOGO,
+                    0, UserHandle.USER_CURRENT) == 1;
+            mTwistedLogoColor = Settings.System.getIntForUser(
+																				resolver, Settings.System.STATUS_BAR_TWISTED_LOGO_COLOR, 0xFFFFFFFF, UserHandle.USER_CURRENT);
+            showTwistedLogo(mTwistedLogo, mTwistedLogoColor);
+
             mWeatherTempColor = Settings.System.getIntForUser(resolver,
                     Settings.System.STATUS_BAR_WEATHER_COLOR, 0xFFFFFFFF, mCurrentUserId);
 
@@ -3876,6 +3896,17 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode,
             }
         }
     };
+
+    public void showTwistedLogo(boolean show, int color) {
+        if (mStatusBarView == null) return;
+        ContentResolver resolver = mContext.getContentResolver();
+        twistedLogo = (ImageView) mStatusBarView.findViewById(R.id.twisted_logo);
+        twistedLogo.setColorFilter(color, Mode.SRC_IN);
+        if (twistedLogo != null) {
+            twistedLogo.setVisibility(show ? (mTwistedLogo ? View.VISIBLE : View.GONE) : View.GONE);
+        }
+    }
+
 
     private void resetUserExpandedStates() {
         ArrayList<Entry> activeNotifications = mNotificationData.getActiveNotifications();

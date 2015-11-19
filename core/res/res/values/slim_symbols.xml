@@ -16,6 +16,20 @@
 */
 -->
 <resources>
+		<!-- OmniBattery - Change 10/04 -->
+  <java-symbol type="array" name="entries_battery_styles" />
+  <java-symbol type="array" name="values_battery_styles" />
+  
+<java-symbol type="dimen" name="battery_meterview_width" />
+  <java-symbol type="dimen" name="battery_meterview_height" />
+
+  <!-- Twisted Theme - Change 10/03 -->
+    <java-symbol type="drawable" name="twisted_dark_floating_background" />
+    <java-symbol type="color" name="twisted_dark_color" />
+    <java-symbol type="style" name="Theme.Material.Dialog.Twisted" />
+    <java-symbol type="style" name="Theme.Material.Dialog.Alert.Twisted" />
+    <java-symbol type="style" name="TextAppearance.Material.Large.Twisted" />
+    <java-symbol type="style" name="TextAppearance.Material.Small.Twisted" />
 
   <!-- Notification and battery light -->
   <java-symbol type="bool" name="config_intrusiveNotificationLed" />

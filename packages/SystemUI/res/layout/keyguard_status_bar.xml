@@ -63,6 +63,7 @@
             android:visibility="gone"
             android:textSize="@dimen/battery_level_text_size"
             android:importantForAccessibility="noHideDescendants"/>
+
     </LinearLayout>
 
     <com.android.systemui.statusbar.widget.CarrierLabel

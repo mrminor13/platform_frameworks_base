@@ -2213,6 +2213,18 @@ public final class Settings {
         public static final String DOZE_BRIGHTNESS = "doze_brightness";
 
         /**
+        * Statusbar DU logo
+        * @hide
+        */
+        public static final String STATUS_BAR_TWISTED_LOGO = "status_bar_twisted_logo";
+
+        /**
+        * Statusbar DU logo
+        * @hide
+        */
+        public static final String STATUS_BAR_TWISTED_LOGO_COLOR = "status_bar_twisted_logo_color";
+
+        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated Use {@link Global#SHOW_PROCESSES} instead

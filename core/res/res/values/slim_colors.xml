@@ -19,7 +19,7 @@
 <resources>
 
     <!-- Slim's global menu -->
-    <color name="global_menu_icon">#ff212121</color>
-    <color name="global_menu_icon_enabled">#ff009688</color>
+    <color name="global_menu_icon">#FFCED7DB</color>
+    <color name="global_menu_icon_enabled">#FFCED7DB</color>
 
 </resources>
