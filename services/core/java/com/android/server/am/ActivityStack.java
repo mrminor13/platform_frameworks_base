@@ -941,10 +941,13 @@ final class ActivityStack {
                         r.userId, System.identityHashCode(r), r.shortComponentName,
                         mPausingActivity != null
                             ? mPausingActivity.shortComponentName : "(none)");
-                if (r.finishing && r.state == ActivityState.PAUSING) {
-                    if (DEBUG_PAUSE) Slog.v(TAG,
-                            "Executing finish of failed to pause activity: " + r);
-                    finishCurrentActivityLocked(r, FINISH_AFTER_VISIBLE, false);
+                if (r.state == ActivityState.PAUSING) {
+                    r.state = ActivityState.PAUSED;
+                    if (r.finishing) {
+                        if (DEBUG_PAUSE) Slog.v(TAG,
+                                "Executing finish of failed to pause activity: " + r);
+                        finishCurrentActivityLocked(r, FINISH_AFTER_VISIBLE, false);
+                    }
                 }
             }
         }
@@ -2040,6 +2043,12 @@ final class ActivityStack {
             ActivityStack lastStack = mStackSupervisor.getLastStack();
             final boolean fromHome = lastStack.isHomeStack();
             if (!isHomeStack() && (fromHome || topTask() != task)) {
+                if( !fromHome && task.isOverHomeStack()) {
+                    int taskNdx = mTaskHistory.indexOf(task);
+                    if ((taskNdx + 1) < mTaskHistory.size()) {
+                        mTaskHistory.get(taskNdx +1).setTaskToReturnTo(task.getTaskToReturnTo());
+                    }
+                }
                 task.setTaskToReturnTo(fromHome
                         ? lastStack.topTask() == null
                                 ? HOME_ACTIVITY_TYPE
