@@ -3784,6 +3784,28 @@ public final class Settings {
         public static final String ALLOW_LIGHTS = "allow_lights";
 
         /**
+         * Change volume up and down handlign based on rotation
+         * @hide
+         */
+        public static final String SWAP_VOLUME_BUTTONS = "swap_volume_buttons";
+
+        /**
+         * Status bar carrier label
+         * 0: Hide
+         * 1: Display on keyguard status bar
+         * 2: Display on Normal status bar
+         * 3: Enabled for both
+         * @hide
+         */
+        public static final String STATUS_BAR_SHOW_CARRIER = "status_bar_show_carrier";
+
+        /**
+         * custom carrier label. The value is
+         * String.
+         */
+        public static final String CUSTOM_CARRIER_LABEL = "custom_carrier_label";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -6345,17 +6367,23 @@ public final class Settings {
          */
         public static final String ASSISTANT = "assistant";
 
-         /**
-          * Whether to allow killing of the foreground app by long-pressing the Back button
-          * @hide
-          */
-         public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
-
         /** Whether to show the brightness slider in quick settings panel.
          *
          * @hide
          */
         public static final String QS_SHOW_BRIGHTNESS_SLIDER = "qs_show_brightness_slider";
+
+        /**
+         * Whether to show four tiles per row.
+         * @hide
+         */
+        public static final String QS_USE_FOUR_COLUMNS = "qs_use_four_columns";
+
+         /**
+          * Whether to allow killing of the foreground app by long-pressing the Back button
+          * @hide
+          */
+         public static final String KILL_APP_LONGPRESS_BACK = "kill_app_longpress_back";
 
         /**
          * Whether the camera launch gesture should be disabled.
