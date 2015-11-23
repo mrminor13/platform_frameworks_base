@@ -63,6 +63,9 @@
   <java-symbol type="drawable" name="ic_lock_assist" />
   <java-symbol type="drawable" name="ic_lock_voice" />
 
+  <!-- correct sensor handling -->
+  <java-symbol type="bool" name="config_useSystemClockforSensors" />
+  
   <!-- Vendor warning -->
   <java-symbol type="string" name="system_error_vendorprint" />
 
