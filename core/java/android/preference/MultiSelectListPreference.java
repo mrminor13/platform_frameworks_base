@@ -220,7 +220,7 @@ public class MultiSelectListPreference extends DialogPreference {
     @Override
     protected Object onGetDefaultValue(TypedArray a, int index) {
         final CharSequence[] defaultValues = a.getTextArray(index);
-        final int valueCount = defaultValues != null ? defaultValues.length : 0;
+        final int valueCount = defaultValues.length;
         final Set<String> result = new HashSet<String>();
         
         for (int i = 0; i < valueCount; i++) {
@@ -250,7 +250,7 @@ public class MultiSelectListPreference extends DialogPreference {
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
-        if (state == null || !state.getClass().equals(SavedState.class)) {
+        if (!state.getClass().equals(SavedState.class)) {
             // Didn't save state for us in onSaveInstanceState
             super.onRestoreInstanceState(state);
             return;
@@ -260,7 +260,7 @@ public class MultiSelectListPreference extends DialogPreference {
         super.onRestoreInstanceState(myState.getSuperState());
         setValues(myState.values);
     }
-    
+
     private static class SavedState extends BaseSavedState {
         Set<String> values;
         
