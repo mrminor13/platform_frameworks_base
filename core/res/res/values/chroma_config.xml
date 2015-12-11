@@ -34,4 +34,11 @@
 
     <!-- kill app long press back -->
     <integer name="config_backKillTimeout">1000</integer>
+
+    <!-- If this is true, key chords can be used to take a screen record on the device. -->
+    <bool name="config_enableScreenrecordChord">true</bool>
+
+    <!-- Older sensors are not setting event.timestamp correctly.  Setting to
+          true will use SystemClock.elapsedRealtimeNanos() to set timestamp-->
+    <bool name="config_useSystemClockforSensors">false</bool>
 </resources>
