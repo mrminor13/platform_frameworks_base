@@ -3191,6 +3191,15 @@ public final class Settings {
         /** @hide */
         public static final Validator LOCK_TO_APP_ENABLED_VALIDATOR = sBooleanValidator;
 
+       /**
+        * MediaScanner behavior on boot.
+        * 0 = enabled
+        * 1 = ask (notification)
+        * 2 = disabled
+        * @hide
+        */
+        public static final String MEDIA_SCANNER_ON_BOOT = "media_scanner_on_boot";
+
         /**
          * I am the lolrus.
          * <p>
@@ -3219,6 +3228,7 @@ public final class Settings {
          * the setting value. See an example above.
          */
 
+        /**
         /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
